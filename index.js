@@ -19,6 +19,14 @@ authenticate(connection);
 // Modelo para configurar as rotas para uso do app
 // app.use(rotaTal);
 
+// Placeholder até fazer as rotas:
+const Cliente = require("./database/cliente");
+const Comida = require("./database/comida");
+const Endereco = require("./database/endereco");
+const Pedido = require("./database/pedido");
+const Restaurante = require("./database/restaurante");
+const Item = require("./database/item");
+
 app.listen(3001, () => {
     // É bom manter o Force: true até todos os modelos de tabela
     // estarem funcionando certinho como o previsto
