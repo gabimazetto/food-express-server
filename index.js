@@ -1,16 +1,21 @@
+// Importações principais e variáveis de ambiente
 const cors = require("cors");
 require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
 
+// Configuração do App
 const app = express();
-app.use(express.json());
+app.use(express.json()); // Possibilitar transitar dados usando JSON
 app.use(morgan("dev"));
 
+// Configurações de acesso
 app.use(cors({ origin: "http://localhost:3000" }));
 
+// Configuração do Banco de Dados
 const { connection, authenticate } = require("./database/database");
-authenticate(connection);
+authenticate(connection); // efetivar a conexão
+
 
 // Modelo para criação de rotas:
 // const rotaTal = require("./routes/rotaTal");
