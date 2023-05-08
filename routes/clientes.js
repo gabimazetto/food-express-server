@@ -54,6 +54,28 @@ router.get("/clientes/:id", async (req, res) => {
     }
 });
 
+//PUT -> Atualizar cliente;
+
+router.put("/clientes/:id", async (req, res) => {
+    const { nome, email, senha, telefone, cpf, dataNascimento, endereco } = req.body;
+    const { id } = req.params;
+    try{
+        const atualizarCliente = await Cliente.findByPk( id );
+        if(atualizarCliente){
+            if(endereco){
+                await Endereco.update( endereco, {where: {clienteId: id}});
+            }
+            await atualizarCliente.update({ nome, email, senha, telefone, cpf, dataNascimento });
+            res.status(200).json({ message: "Cliente editado." });
+        } else {
+            res.status(404).json({ message: "Cliente não encontrado." });
+        }
+    }catch (err) {
+        console.error(err);
+    res.status(500).json({ message: "Um erro aconteceu." });
+    }
+});
+
 
 
 
