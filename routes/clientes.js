@@ -26,4 +26,16 @@ router.post("/clientes", async (req, res) =>{
     }
 });
 
+// GET
+router.get("/clientes", async (req, res) =>{
+    // SELECT * FROM clientes;
+    const listaClientes = await Cliente.findAll();
+    res.json(listaClientes);
+})
+
+
+
+
+
+
 module.exports = router;
