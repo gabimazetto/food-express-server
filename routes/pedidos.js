@@ -26,3 +26,5 @@ router.post("/pedidos", async (req, res) => {
         res.status(500).json({message: "Um erro aconteceu"});
     }
 });
+
+module.exports = router;

@@ -1,8 +1,8 @@
-// Importações principais e variáveis de ambiente
-const cors = require("cors");
-require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const morgan = require("morgan");
+require("dotenv").config();
+
 
 // Configuração do App
 const app = express();
@@ -17,20 +17,24 @@ const { connection, authenticate } = require("./database/database");
 authenticate(connection); // efetivar a conexão
 
 
+
 // Modelo para criação de rotas:
 // const rotaTal = require("./routes/rotaTal");
-
+const rotasClientes = require("./routes/clientes");
+const rotasRestaurantes = require("./routes/restaurantes");
+const rotasComidas = require("./routes/comidas");
+const rotasItens = require("./routes/itens");
+const rotasPedidos = require("./routes/pedidos");
 
 // Modelo para configurar as rotas para uso do app
 // app.use(rotaTal);
+app.use(rotasClientes);
+app.use(rotasRestaurantes);
+app.use(rotasComidas);
+app.use(rotasItens);
+app.use(rotasPedidos);
 
-// Placeholder até fazer as rotas:
-const Cliente = require("./database/cliente");
-const Comida = require("./database/comida");
-const Endereco = require("./database/endereco");
-const Pedido = require("./database/pedido");
-const Restaurante = require("./database/restaurante");
-const Item = require("./database/item");
+
 
 app.listen(3001, () => {
     // É bom manter o Force: true até todos os modelos de tabela
