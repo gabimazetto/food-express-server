@@ -16,11 +16,12 @@ authenticate(connection);
 // Modelo para criação de rotas:
 // const rotaTal = require("./routes/rotaTal");
 const rotasClientes = require("./routes/clientes");
-
+const rotasRestaurantes = require("./routes/restaurantes");
 
 // Modelo para configurar as rotas para uso do app
 // app.use(rotaTal);
 app.use(rotasClientes);
+app.use(rotasRestaurantes);
 
 // Placeholder até fazer as rotas:
 const Cliente = require("./database/cliente");
