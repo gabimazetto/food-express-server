@@ -1,7 +1,8 @@
-const cors = require("cors");
-require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const morgan = require("morgan");
+require("dotenv").config();
+
 
 const app = express();
 app.use(express.json());
@@ -14,10 +15,12 @@ authenticate(connection);
 
 // Modelo para criação de rotas:
 // const rotaTal = require("./routes/rotaTal");
+const rotasClientes = require("./routes/clientes");
 
 
 // Modelo para configurar as rotas para uso do app
 // app.use(rotaTal);
+app.use(rotasClientes);
 
 // Placeholder até fazer as rotas:
 const Cliente = require("./database/cliente");
