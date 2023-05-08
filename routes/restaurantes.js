@@ -5,7 +5,7 @@ const Endereco = require("../database/endereco");
 const router = Router();
 
 
-//GET -> Listagem de todos restaurantes;
+// GET -> Listagem de todos restaurantes;
 router.get("/restaurantes", async (req, res) => {
     const listaRestaurantes = await Restaurante.findAll();
     res.json(listaRestaurantes)
