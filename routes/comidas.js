@@ -26,5 +26,23 @@ router.get("/comidas", async (req, res) => {
   }
 });
 
+// ROTA PARA LISTAR UMA COMIDA POR ID
+router.get("/comidas/:id", async (req, res) => {
+  try {
+    const comida = await Comida.findOne({
+      where: { id: req.params.id },
+    });
+    if (comida) {
+      res.status(201).json(comida);
+    } else {
+      res.status(404).json({ message: "Comida não encontrada." });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Um erro aconteceu." });
+  }
+});
+
+
 
 module.exports = router;
