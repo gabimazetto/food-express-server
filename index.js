@@ -13,15 +13,19 @@ app.use(cors({ origin: "http://localhost:3000" }));
 const { connection, authenticate } = require("./database/database");
 authenticate(connection);
 
+
 // Modelo para criação de rotas:
 // const rotaTal = require("./routes/rotaTal");
 const rotasClientes = require("./routes/clientes");
 const rotasRestaurantes = require("./routes/restaurantes");
+const rotasComidas = require("./routes/comidas");
 
 // Modelo para configurar as rotas para uso do app
 // app.use(rotaTal);
 app.use(rotasClientes);
 app.use(rotasRestaurantes);
+app.use(rotasComidas);
+
 
 // Placeholder até fazer as rotas:
 const Cliente = require("./database/cliente");
