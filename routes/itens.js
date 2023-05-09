@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Item = require("../database/item");
-const Comida = require("../database/comida");
+const { Comida } = require("../database/comida");
 
 // ROTA PARA ADICIONAR UM ITEM - POST
 router.post("/itens", async (req, res) => {
