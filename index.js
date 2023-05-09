@@ -36,6 +36,7 @@ app.use(rotasPedidos);
 
 
 const Favorito = require("./database/favorito");
+const Avaliacao = require("./database/avaliacao");
 
 
 app.listen(3001, () => {
