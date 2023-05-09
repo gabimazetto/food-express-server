@@ -4,6 +4,8 @@ const Restaurante = require("../database/restaurante");
 const Pedido = require("../database/pedido");
 
 const { Router } = require("express");
+const { Comida } = require("../database/comida");
+const Endereco = require("../database/endereco");
 
 const router = Router();
 
@@ -31,7 +33,24 @@ router.post("/pedidos", async (req, res) => {
 router.get("/pedidos", async (req, res) => {
     try {
         const pedidos = await Pedido.findAll({
-            include: [ Cliente , Restaurante ],
+            include: [
+                {
+                    model: Item,
+                    attributes: ["quantidade"],
+                    include: [{
+                            model: Comida,
+                            attributes: ["nome"]
+                        }]
+                },
+                {
+                    model: Cliente,
+                    include: Endereco
+                },
+                {
+                    model: Restaurante,
+                    attributes: ["nomeFantasia"]
+                },
+            ],
             order: [["dataRegistro", "DESC"]]
         });
         res.status(200).json(pedidos);
