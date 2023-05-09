@@ -9,14 +9,14 @@ const router = Router();
 
 // ROTA PARA ADICIONAR UM PEDIDO - POST
 router.post("/pedidos", async (req, res) => {
-    const { dataRegistro, status, clienteId, restauranteId, itemId } = req.body;
+    const { dataRegistro, status, clienteId, restauranteId, itemId, metodoPagamento } = req.body;
     try {
         const cliente = await Cliente.findByPk(clienteId);
         const restaurante = await Restaurante.findByPk(restauranteId);
         const item = await Item.findByPk(itemId);
 
         if (cliente && restaurante && item) {
-            const pedido = await Pedido.create({ dataRegistro, status, clienteId, restauranteId, itemId });
+            const pedido = await Pedido.create({ dataRegistro, status, clienteId, restauranteId, itemId, metodoPagamento });
             res.status(201).json(pedido);
         } else {
             res.status(404).json({ message: "Pedido não pode ser adicionado" });
