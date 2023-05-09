@@ -6,9 +6,9 @@ const router = Router();
 
 // ROTA PARA CADASTRAR UMA COMIDA
 router.post("/comidas", async (req, res) => {
-  const { codigo, nome, descricao, categoria, preco, peso, imagem } = req.body;
+  const { codigo, nome, descricao, categoria, preco, peso, imagem, restauranteId } = req.body;
   try {
-    const novaComida = await Comida.create({ codigo, nome, descricao, categoria, preco, peso, imagem });
+    const novaComida = await Comida.create({ codigo, nome, descricao, categoria, preco, peso, imagem, restauranteId });
     res.status(201).json(novaComida);
   } catch (err) {
     console.log(err);
