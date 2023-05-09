@@ -27,6 +27,19 @@ router.post("/pedidos", async (req, res) => {
     }
 });
 
+// ROTA PARA LISTAR PEDIDOS ORDENADOS POR DATA - GET
+router.get("/pedidos", async (req, res) => {
+    try {
+        const pedidos = await Pedido.findAll({
+            order: [["dataRegistro", "DESC"]]
+        });
+        res.status(200).json(pedidos);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Um erro aconteceu." });
+    }
+});
+
 // ROTA PARA ATUALIZAR UM PEDIDO - PUT
 router.put("/pedidos/:id", async (req, res) => {
     const { dataRegistro, status, clienteId, restauranteId, itemId } = req.body;

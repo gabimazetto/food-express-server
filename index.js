@@ -39,6 +39,6 @@ app.use(rotasPedidos);
 app.listen(3001, () => {
     // É bom manter o Force: true até todos os modelos de tabela
     // estarem funcionando certinho como o previsto
-    connection.sync({force:true});
+    connection.sync();
     console.log("Servidor rodando em http://localhost:3001/");
 });
