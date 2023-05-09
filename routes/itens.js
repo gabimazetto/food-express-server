@@ -33,6 +33,24 @@ router.get("/itens", async (req, res) => {
     res.json(listaItens);
 });
 
+// ROTA PARA ATUALIZAR UM ITEM
+router.put("/itens/:id", async (req, res) => {
+    const { quantidade, comidaId  } = req.body;
+    const { id } = req.params;
+    try{
+      const item = await Item.findByPk(id);
+  
+      if(item) {
+      await item.update({ quantidade, comidaId })
+      res.status(200).json({message: "Item atualizado."})
+      } else {
+        res.status(404).json({message:"Item não encontrado."})
+      }
+    } catch (err) {
+      res.status(500).json("Ocorreu um erro.")
+    }
+  })
+
 // ROTA PARA A REMOÇÃO DE UM ITEM - DELETE
 router.delete("/itens/:id", async (req, res) => {
     const { id } = req.params;    
