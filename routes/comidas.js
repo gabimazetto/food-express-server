@@ -1,17 +1,31 @@
 const { Op } = require("sequelize");
 const { Router } = require("express");
-const Comida = require("../database/comida");
+const { Comida, uploadImagemComida } = require("../database/comida");
+
+// Importar o Multer para gerenciar o upload dos arquivos do form.
+const multer = require("multer");
+const upload = multer();
 
 const router = Router();
 
 // ROTA PARA CADASTRAR UMA COMIDA
-router.post("/comidas", async (req, res) => {
-  const { codigo, nome, descricao, categoria, preco, peso, imagem, restauranteId } = req.body;
+// Logo após a rota, é necessário passar o upload.single("nomeDoCampoQueRecebeArquivo").
+router.post("/comidas", upload.single("imagem"), async (req, res) => {
+  const { codigo, nome, descricao, categoria, preco, peso, restauranteId } = req.body;
   try {
-    const novaComida = await Comida.create({ codigo, nome, descricao, categoria, preco, peso, imagem, restauranteId });
-    res.status(201).json(novaComida);
+    if( codigo && nome && descricao && categoria && preco && peso && restauranteId ){
+      // Após receber os dados de upload é possível de passar esses dados para dentro
+      // da função de upload que está no Model de Comida.
+      const imagemURL = await uploadImagemComida(req.file);
+      const novaComida = await Comida.create({ codigo, nome, descricao, categoria, preco, peso, imagem: imagemURL, restauranteId });
+      res.status(201).json(novaComida);
+    } else if ( !restauranteId ){
+      res.status(404).json({ message: "Restaurante não encontrado." });
+    } else {
+      res.status(400).json({ message: "Requisição inválida." });
+    }
+    
   } catch (err) {
-    console.log(err);
     res.status(500).json({ message: "Um erro aconteceu." });
   }
 });
