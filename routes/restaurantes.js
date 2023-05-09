@@ -2,7 +2,7 @@ const { Router } = require("express");
 const Restaurante = require("../database/restaurante");
 const Endereco = require("../database/endereco");
 const { Op } = require("sequelize");
-const Comida = require("../database/comida");
+const { Comida } = require("../database/comida");
 
 const router = Router();
 
