@@ -1,6 +1,10 @@
+
+
 const { DataTypes } = require("sequelize");
 const { connection } = require("./database");
 const Restaurante = require("./restaurante");
+const { storage } = require("./firebase/config");
+const { getDownloadURL, ref, uploadBytes } = require("firebase/storage");
 
 const Comida = connection.define(
     "comida",
@@ -61,4 +65,13 @@ const Comida = connection.define(
 Restaurante.hasMany(Comida, { foreignKey: "restauranteId" });
 Comida.belongsTo(Restaurante, { foreignKey: "restauranteId" });
 
-module.exports = Comida;
+// file.originalname, vai trazer o nome do arquivo que selecionar.
+// file.buffer, vai trazer o arquivo que está na memória do computador para upload.
+async function uploadImagemComida(file) {
+    const filename = file.originalname;
+    const imageRef = ref(storage, `refeições/${filename}`);
+    const result = await uploadBytes(imageRef, file.buffer);
+    return await getDownloadURL(result.ref);
+}
+
+module.exports = { Comida, uploadImagemComida };
