@@ -4,6 +4,8 @@ const Restaurante = require("../database/restaurante");
 const Pedido = require("../database/pedido");
 
 const { Router } = require("express");
+const { Comida } = require("../database/comida");
+const Endereco = require("../database/endereco");
 
 const router = Router();
 
@@ -31,7 +33,24 @@ router.post("/pedidos", async (req, res) => {
 router.get("/pedidos", async (req, res) => {
     try {
         const pedidos = await Pedido.findAll({
-            include: [ Cliente , Restaurante ],
+            include: [
+                {
+                    model: Item,
+                    attributes: ["quantidade"],
+                    include: [{
+                            model: Comida,
+                            attributes: ["nome"]
+                        }]
+                },
+                {
+                    model: Cliente,
+                    include: Endereco
+                },
+                {
+                    model: Restaurante,
+                    attributes: ["nomeFantasia"]
+                },
+            ],
             order: [["dataRegistro", "DESC"]]
         });
         res.status(200).json(pedidos);
@@ -45,18 +64,18 @@ router.get("/pedidos", async (req, res) => {
 router.put("/pedidos/:id", async (req, res) => {
     const { dataRegistro, status, clienteId, restauranteId, itemId } = req.body;
     const { id } = req.params;
-    try{
-      const pedido = await Pedido.findByPk(id);  
-      if(pedido) {
-      await pedido.update({ dataRegistro, status, clienteId, restauranteId, itemId })
-      res.status(200).json({message: "Pedido atualizado."})
-      } else {
-        res.status(404).json({message:"Pedido não encontrado."})
-      }
+    try {
+        const pedido = await Pedido.findByPk(id);
+        if (pedido) {
+            await pedido.update({ dataRegistro, status, clienteId, restauranteId, itemId })
+            res.status(200).json({ message: "Pedido atualizado." })
+        } else {
+            res.status(404).json({ message: "Pedido não encontrado." })
+        }
     } catch (err) {
-      res.status(500).json("Ocorreu um erro.")
+        res.status(500).json("Ocorreu um erro.")
     }
-  })
+})
 
 // ROTA PARA A REMOÇÃO DE UM PEDIDO - DELETE
 router.delete("/pedidos/:id", async (req, res) => {
