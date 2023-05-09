@@ -61,4 +61,21 @@ router.put("/comidas/:id", async (req, res) => {
   }
 })
 
+// ROTA DELETE PARA COMIDA
+router.delete("/comidas/:id", async (req,res) => {
+  const { id } = req.params;
+  const comida = await Comida.findOne({ where: { id }})
+try {
+  if (comida) {
+    await comida.destroy()
+    res.status(200).json({message: "Comida removida."})
+  } else {
+    res.status(404).json({message:"Comida não encontrada."})
+  }
+} catch (err) {
+  console.error(err);
+  res.status(500).json({message: "Um erro aconteceu."})
+}
+})
+
 module.exports = router;
