@@ -27,6 +27,23 @@ router.post("/pedidos", async (req, res) => {
     }
 });
 
+// ROTA PARA ATUALIZAR UM PEDIDO - PUT
+router.put("/pedidos/:id", async (req, res) => {
+    const { dataRegistro, status, clienteId, restauranteId, itemId } = req.body;
+    const { id } = req.params;
+    try{
+      const pedido = await Pedido.findByPk(id);  
+      if(pedido) {
+      await pedido.update({ dataRegistro, status, clienteId, restauranteId, itemId })
+      res.status(200).json({message: "Pedido atualizado."})
+      } else {
+        res.status(404).json({message:"Pedido não encontrado."})
+      }
+    } catch (err) {
+      res.status(500).json("Ocorreu um erro.")
+    }
+  })
+
 // ROTA PARA A REMOÇÃO DE UM PEDIDO - DELETE
 router.delete("/pedidos/:id", async (req, res) => {
     const { id } = req.params;
