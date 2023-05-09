@@ -33,13 +33,12 @@ router.get("/itens", async (req, res) => {
     res.json(listaItens);
 });
 
-// ROTA PARA ATUALIZAR UM ITEM
+// ROTA PARA ATUALIZAR UM ITEM - PUT
 router.put("/itens/:id", async (req, res) => {
     const { quantidade, comidaId  } = req.body;
     const { id } = req.params;
     try{
-      const item = await Item.findByPk(id);
-  
+      const item = await Item.findByPk(id);  
       if(item) {
       await item.update({ quantidade, comidaId })
       res.status(200).json({message: "Item atualizado."})
