@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const { Router } = require("express");
 const Comida = require("../database/comida");
 
@@ -16,15 +17,37 @@ router.post("/comidas", async (req, res) => {
 });
 
 // ROTA PARA LISTAR TODAS AS COMIDAS
-router.get("/comidas", async (req, res) => {
-  try {
-    const listaComidas = await Comida.findAll();
-    res.status(201).json(listaComidas);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Um erro aconteceu." });
+// router.get("/comidas", async (req, res) => {
+//   try {
+//     const listaComidas = await Comida.findAll();
+//     res.status(201).json(listaComidas);
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ message: "Um erro aconteceu." });
+//   }
+// });
+
+// ROTA PARA LISTAR COMIDAS FILTRADAS POR CATEGORIA, NOME E DESCRIÇÃO
+router.get("/comidas", async (req, res) =>{
+  const categoria = req.query.categoria;
+  const nome = req.query.nome;
+  const descricao = req.query.descricao;
+
+  const whereClause = {};
+  if(nome) {
+    whereClause.nome = { [Op.like]: `%${nome}%`};
   }
-});
+  if(descricao){
+    whereClause.descricao = { [Op.like]: `%${descricao}%`};
+  }
+  if(categoria) {
+    whereClause.categoria = { [Op.eq] : categoria };
+  }
+  const listaComidas = await Comida.findAll({ where: whereClause });
+  res.json(listaComidas);
+})
+
+
 
 // ROTA PARA LISTAR UMA COMIDA POR ID
 router.get("/comidas/:id", async (req, res) => {
