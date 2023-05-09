@@ -35,6 +35,8 @@ app.use(rotasItens);
 app.use(rotasPedidos);
 
 
+const Favorito = require("./database/favorito");
+
 
 app.listen(3001, () => {
     // É bom manter o Force: true até todos os modelos de tabela
