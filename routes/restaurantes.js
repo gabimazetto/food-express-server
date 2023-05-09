@@ -65,5 +65,22 @@ router.put("/restaurantes/:id", async (req, res) =>{
 });
 
 
+// DELETE -> Remover restaurante;
+router.delete("/restaurantes/:id", async (req, res) => {
+  const { id } = req.params;    
+  try {
+      const deletaRestaurante = await Restaurante.findByPk(id);
+      if (deletaRestaurante) {
+          await deletaRestaurante.destroy();
+          res.status(200).json({ message: "Restaurante removido." });
+      } else {
+          res.status(404).json({ message: "Restaurante não encontrado." });
+      }
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Um erro aconteceu." });
+  }
+});
+
 
 module.exports = router;
