@@ -31,6 +31,7 @@ router.post("/pedidos", async (req, res) => {
 router.get("/pedidos", async (req, res) => {
     try {
         const pedidos = await Pedido.findAll({
+            include: [ Cliente , Restaurante ],
             order: [["dataRegistro", "DESC"]]
         });
         res.status(200).json(pedidos);
