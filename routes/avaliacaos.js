@@ -25,7 +25,18 @@ router.post ("/avaliacaos", async (req,res) => {
     }
 })
 
-
+// ROTA PARA LISTAR AVALIAÇÕES POR ID DE RESTAURANTE - GET
+router.get("/avaliacaos/:restauranteId", async (req, res) => {
+    try {
+        const avaliacoes = await Avaliacao.findAll({
+            where: { restauranteId: req.params.restauranteId },
+        });
+        res.json(avaliacoes);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Um erro aconteceu" });
+    }
+});
 
 
 module.exports = router;
