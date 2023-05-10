@@ -5,6 +5,7 @@ const Restaurante = require("../database/restaurante");
 const Favorito = require("../database/favorito");
 const router = Router(); 
 
+// Adicionando Restaurante Favorito
 router.post("/favoritos/restaurantes", async (req, res) => {
     const { favoritar, restauranteId, clienteId } = req.body;
     try {
@@ -23,6 +24,7 @@ router.post("/favoritos/restaurantes", async (req, res) => {
     }
 });
 
+// Adicionando Comida Favorita
 router.post("/favoritos/comidas", async (req, res) => {
     const { favoritar, comidaId, clienteId } = req.body;
     try {
@@ -40,5 +42,49 @@ router.post("/favoritos/comidas", async (req, res) => {
         res.status(500).json({ message: "Error 500"})
     }
 });
+
+// Listar Comida(s) Favorita(s)
+router.get("/favoritos/comidas", async (req, res) => {
+    const clienteId = req.params.clienteId
+    try {
+        const favoritos = await Favorito.findAll();
+        res.status(201).json(favoritos);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Error 500"});
+    }
+});
+
+// ROTA PARA REMOVER UMA COMIDA FAVORITA - DELETE
+router.delete("/favoritos/comidas/:id", async (req, res) => {
+    const { id } = req.params;    
+    const favorito = await Favorito.findOne({ where: { id } });    
+    try {
+        if (favorito) {
+            await favorito.destroy();
+            res.status(200).json({ message: "Comida favorita removida." });
+        } else {
+            res.status(404).json({ message: "Comida favorita não encontrada." });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Um erro aconteceu." });
+    }
+});
+
+router.delete("/favoritos/restaurantes/:id", async (req, res ) => {
+    const {id } = req.params;
+    const favorito = await Favorito.findOne({where:{ id }});
+    try{
+        if(favorito) {
+            await favorito.destroy();
+            res.status(200).json({message: "Restaurante favorito removido."})
+        } else {
+            res.status(404).json({message: "Restaurante não encontrado."})
+        }
+    } catch(err) {
+        res.status(500).json({message:"Um erro aconteceu."})
+    }
+})
 
 module.exports = router;
