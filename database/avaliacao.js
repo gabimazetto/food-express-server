@@ -5,13 +5,13 @@ const Pedido = require("./pedido");
 const Cliente = require("./cliente");
 
 const Avaliacao = connection.define("avaliacao", {
-  avaliação: {
+  avaliacao: {
     type: DataTypes.STRING,    
     validate: {
       isIn: [[ "1", "2", "3", "4", "5" ]]
     },
   },
-  comentário: {
+  comentario: {
     type: DataTypes.STRING(155),  
   }  
 });
