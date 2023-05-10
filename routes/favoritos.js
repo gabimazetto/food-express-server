@@ -41,4 +41,15 @@ router.post("/favoritos/comidas", async (req, res) => {
     }
 });
 
+router.get("/favoritos/comidas", async (req, res) => {
+    const clienteId = req.params.clienteId
+    try {
+        const favoritos = await Favorito.findAll();
+        res.status(201).json(favoritos);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Error 500"});
+    }
+});
+
 module.exports = router;
