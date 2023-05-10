@@ -25,6 +25,9 @@ const rotasRestaurantes = require("./routes/restaurantes");
 const rotasComidas = require("./routes/comidas");
 const rotasItens = require("./routes/itens");
 const rotasPedidos = require("./routes/pedidos");
+const rotasAvaliacao = require("./routes/avaliacaos");
+const rotasFavoritos = require("./routes/favoritos");
+
 
 // Modelo para configurar as rotas para uso do app
 // app.use(rotaTal);
@@ -33,12 +36,17 @@ app.use(rotasRestaurantes);
 app.use(rotasComidas);
 app.use(rotasItens);
 app.use(rotasPedidos);
+app.use(rotasAvaliacao);
+app.use(rotasFavoritos);
 
+
+const Favorito = require("./database/favorito");
+const Avaliacao = require("./database/avaliacao");
 
 
 app.listen(3001, () => {
     // É bom manter o Force: true até todos os modelos de tabela
     // estarem funcionando certinho como o previsto
-    connection.sync({force:true});
+    connection.sync();
     console.log("Servidor rodando em http://localhost:3001/");
 });

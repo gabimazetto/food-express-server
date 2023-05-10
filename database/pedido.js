@@ -9,12 +9,18 @@ const Pedido = connection.define("pedido", {
     type: DataTypes.DATEONLY,
     allowNull: false,
   },
-  status: {    
+  status: {
     type: DataTypes.STRING,
     defaultValue: "Pendente",
     validate: {
-      isIn: [[ "Pendente", "Aguardando confirmação", "Confirmado", "A caminho", "Entregue", "Cancelado"]]
+      isIn: [["Pendente", "Aguardando confirmação", "Confirmado", "A caminho", "Entregue", "Cancelado"]]
     },
+    metodoPagamento: {
+      type: DataTypes.STRING,
+      validate: {
+        isIn: [["Cartão de crédito", "Cartão de débito", "Dinheiro", "PIX", "VR", "VA", "Carteira Digital"]]
+      },
+    }
   }
 }, { paranoid: true });
 
