@@ -26,6 +26,7 @@ const rotasComidas = require("./routes/comidas");
 const rotasItens = require("./routes/itens");
 const rotasPedidos = require("./routes/pedidos");
 const rotasAvaliacao = require("./routes/avaliacaos");
+const rotasFavoritos = require("./routes/favoritos");
 
 
 // Modelo para configurar as rotas para uso do app
@@ -36,6 +37,7 @@ app.use(rotasComidas);
 app.use(rotasItens);
 app.use(rotasPedidos);
 app.use(rotasAvaliacao);
+app.use(rotasFavoritos);
 
 
 const Favorito = require("./database/favorito");
