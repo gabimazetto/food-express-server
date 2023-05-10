@@ -55,5 +55,22 @@ router.delete("/avaliacaos/:id", async (req, res) => {
     }
 });
 
+router.put("/avaliacaos/:id", async (req, res ) => {
+    const { avaliacao, comentario} = req.body;
+    const { id } = req.params;
+    try {
+        const avaliar = await Avaliacao.findByPk(id);
+        if (avaliar) {
+            await avaliar.update({avaliacao, comentario})
+            res.status(200).json({message: "Sua avaliação foi atualizada."})
+        } else {
+            res.status(404).json({message:"Avaliação não encontrada."})
+        }
+    } catch(err) {
+        res.status(500).json("Ocorreu um erro.")
+        console.log(err)
+    }
+})
+
 
 module.exports = router;
