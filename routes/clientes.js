@@ -1,4 +1,5 @@
 // Importações necessárias
+const Avaliacao = require("../database/avaliacao");
 const Cliente = require("../database/cliente");
 const Endereco = require("../database/endereco");
 const Pedido = require("../database/pedido");
@@ -58,6 +59,21 @@ router.get('/clientes/:id/pedidos', async (req, res) => {
           });
   
       res.json(pedidos);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro ao buscar pedidos do cliente' });
+    }
+  });
+
+  // ROTA PARA FILTRAR TODAS AS AVALIAÇÕES FEITAS POR CLIENTE
+router.get('/clientes/:id/avaliacaos', async (req, res) => {
+    try {
+        const avaliacoes = await Cliente.findAll({
+            where: { id: req.params.id }, // Filtra pelo "id" do cliente
+            include: [ Avaliacao ], 
+          });
+  
+      res.json(avaliacoes);
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Erro ao buscar pedidos do cliente' });
