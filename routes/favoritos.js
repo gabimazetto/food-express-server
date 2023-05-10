@@ -5,6 +5,7 @@ const Restaurante = require("../database/restaurante");
 const Favorito = require("../database/favorito");
 const router = Router(); 
 
+// Adicionando Restaurante Favorito
 router.post("/favoritos/restaurantes", async (req, res) => {
     const { favoritar, restauranteId, clienteId } = req.body;
     try {
@@ -23,6 +24,7 @@ router.post("/favoritos/restaurantes", async (req, res) => {
     }
 });
 
+// Adicionando Comida Favorita
 router.post("/favoritos/comidas", async (req, res) => {
     const { favoritar, comidaId, clienteId } = req.body;
     try {
@@ -41,6 +43,7 @@ router.post("/favoritos/comidas", async (req, res) => {
     }
 });
 
+// Listar Comida(s) Favorita(s)
 router.get("/favoritos/comidas", async (req, res) => {
     const clienteId = req.params.clienteId
     try {
@@ -49,6 +52,8 @@ router.get("/favoritos/comidas", async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Error 500"});
+    }
+});
 
 // ROTA PARA REMOVER UMA COMIDA FAVORITA - DELETE
 router.delete("/favoritos/comidas/:id", async (req, res) => {
