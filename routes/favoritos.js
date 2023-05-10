@@ -72,4 +72,19 @@ router.delete("/favoritos/comidas/:id", async (req, res) => {
     }
 });
 
+router.delete("/favoritos/restaurantes/:id", async (req, res ) => {
+    const {id } = req.params;
+    const favorito = await Favorito.findOne({where:{ id }});
+    try{
+        if(favorito) {
+            await favorito.destroy();
+            res.status(200).json({message: "Restaurante favorito removido."})
+        } else {
+            res.status(404).json({message: "Restaurante não encontrado."})
+        }
+    } catch(err) {
+        res.status(500).json({message:"Um erro aconteceu."})
+    }
+})
+
 module.exports = router;
