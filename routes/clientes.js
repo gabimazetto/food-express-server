@@ -1,6 +1,7 @@
 // Importações necessárias
 const Cliente = require("../database/cliente");
 const Endereco = require("../database/endereco");
+const Pedido = require("../database/pedido");
 const { Router } = require("express");
 
 // Criar o grupo de rotas (/clientes);
@@ -47,6 +48,21 @@ router.get("/clientes/:id", async (req, res) => {
         res.status(500).json({ message: "Um erro aconteceu" });
     }
 });
+
+// ROTA PARA FILTRAR TODOS OS PEDIDOS DE CLIENTE
+router.get('/clientes/:id/pedidos', async (req, res) => {
+    try {
+        const pedidos = await Cliente.findAll({
+            where: { id: req.params.id }, // Filtra pelo "id" do cliente
+            include: [ Pedido ], 
+          });
+  
+      res.json(pedidos);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro ao buscar pedidos do cliente' });
+    }
+  });
 
 // ROTA PARA ATUALIZAR UM CLIENTE - PUT
 router.put("/clientes/:id", async (req, res) => {
