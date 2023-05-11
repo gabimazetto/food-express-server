@@ -21,9 +21,10 @@ router.post("/restaurantes", async (req, res) => {
 });
 
 
-// ROTA PARA LISTAR TODOS OS RESTAURANTES - GET 
 router.get("/restaurantes", async (req, res) => {
-    const listaRestaurantes = await Restaurante.findAll();
+    const listaRestaurantes = await Restaurante.findAll({
+        include:[Endereco]
+    });
     res.json(listaRestaurantes)
 });
 
@@ -32,6 +33,7 @@ router.get("/restaurantes/:id", async (req, res) => {
     try {
         const restaurante = await Restaurante.findOne({
             where: { id: req.params.id },
+            include:[Endereco]
         });
         if (restaurante) {
             res.status(201).json(restaurante);
