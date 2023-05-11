@@ -46,7 +46,59 @@ router.post("/favoritos/comidas", async (req, res) => {
 });
 
 
+//Rota GET para listar todas as comidas salvas como favoritas 
+router.get("/favoritos/comidas", async (req, res) => {
+    try {
+        const favoritos = await Favorito.findAll({
+            where: {
+                comidaId: {
+                    [Op.ne]: null,
+                },
+            },
+            include: [
+                {
+                    model: Comida,
+                    attributes: ["id", "nome", "descricao", "preco", "restauranteId"],
+                    include: [
+                        {
+                            model: Restaurante,
+                            attributes: ["nomeFantasia"],
+                        },
+                    ],
+                },
+            ],
+        });
 
+        const comidaIds = favoritos.map((favorito) => favorito.comidaId);
+        const comidasFavoritadasUnico = Array.from(new Set(comidaIds));
+
+        const comidasFavoritadas = await Comida.findAll({
+            where: {
+                id: {
+                    [Op.in]: comidasFavoritadasUnico,
+                },
+            },
+            attributes: ["id", "nome", "descricao", "preco", "restauranteId"],
+            include: [
+                {
+                    model: Restaurante,
+                    attributes: ["nomeFantasia"],
+                },
+            ],
+        });
+
+        if (comidasFavoritadas.length > 0) {
+            res.status(200).json(comidasFavoritadas);
+        } else {
+            res.status(404).json({ message: "Nenhuma comida favorita encontrada" });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Erro 500" });
+    }
+});
+
+//Rota GET para listar todas as comidas favoritas de um cliente especifico 
 router.get("/favoritos/comidas/:clienteId", async (req, res) => {
     const { clienteId } = req.params;
 
@@ -101,19 +153,6 @@ router.get("/favoritos/comidas/:clienteId", async (req, res) => {
     }
 });
 
-
-
-// Listar Comida(s) Favorita(s)
-router.get("/favoritos/comidas", async (req, res) => {
-    const clienteId = req.params.clienteId
-    try {
-        const favoritos = await Favorito.findAll();
-        res.status(201).json(favoritos);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Error 500"});
-    }
-});
 
 
 
