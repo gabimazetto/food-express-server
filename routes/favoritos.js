@@ -45,7 +45,6 @@ router.post("/favoritos/comidas", async (req, res) => {
     }
 });
 
-
 //Rota GET para listar todas as comidas salvas como favoritas 
 router.get("/favoritos/comidas", async (req, res) => {
     try {
@@ -153,7 +152,46 @@ router.get("/favoritos/comidas/:clienteId", async (req, res) => {
     }
 });
 
+// Rota GET para listar todos os restaurantes favoritos 
+router.get("/favoritos/restaurantes", async (req, res) => {
+    try {
+        const favoritos = await Favorito.findAll({
+            where: {
+                restauranteId: {
+                    [Op.ne]: null,
+                },
+            },
+            attributes: ["restauranteId"], // Adicione esta linha
+            include: [
+                {
+                    model: Restaurante,
+                    attributes: ["id", "nomeFantasia", "razaoSocial", "cnpj", "email"],
+                },
+            ],
+        });
 
+        const restauranteIds = favoritos.map((favorito) => favorito.restauranteId);
+        const RestaurantesFavoritadosUnico = Array.from(new Set(restauranteIds));
+
+        const restaurantesFavoritados = await Restaurante.findAll({
+            where: {
+                id: {
+                    [Op.in]: RestaurantesFavoritadosUnico,
+                },
+            },
+            attributes: ["id", "nomeFantasia", "razaoSocial", "cnpj", "email"],
+        });
+
+        if (restaurantesFavoritados.length > 0) {
+            res.status(200).json(restaurantesFavoritados);
+        } else {
+            res.status(404).json({ message: "Não existem restaurantes favoritos" });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Error 500" });
+    }
+});
 
 
 // ROTA PARA REMOVER UMA COMIDA FAVORITA - DELETE
