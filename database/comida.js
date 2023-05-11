@@ -42,7 +42,7 @@ const Comida = connection.define(
                         "Carne",
                         "Fit",
                         "Árabe",
-                    ],
+                    ].map(opcao => opcao.toLowerCase()),
                 ],
             },
         },
