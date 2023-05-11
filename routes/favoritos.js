@@ -193,6 +193,28 @@ router.get("/favoritos/restaurantes", async (req, res) => {
     }
 });
 
+// Rota GET para listar dos restaurantes favoritos por um cliente especifico
+router.get("/favoritos/restaurantes/:clienteId", async (req, res) => {
+    const { clienteId } = req.params;
+    try {
+        const favoritos = await Favorito.findAll({
+            where: { clienteId },
+            include: [{
+                model: Restaurante,
+                required: true,
+            }]
+        });
+
+        if (favoritos.length > 0) {
+            res.status(200).json(favoritos);
+        } else {
+            res.status(404).json({ message: "Restaurante inexistente" });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Error 500" });
+    }
+});
 
 // ROTA PARA REMOVER UMA COMIDA FAVORITA - DELETE
 router.delete("/favoritos/comidas/:id", async (req, res) => {
