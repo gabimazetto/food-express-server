@@ -102,10 +102,6 @@ router.get("/favoritos/comidas/:clienteId", async (req, res) => {
 });
 
 
-
-
-
-
 // Listar Comida(s) Favorita(s)
 router.get("/favoritos/comidas", async (req, res) => {
     const clienteId = req.params.clienteId
@@ -117,7 +113,6 @@ router.get("/favoritos/comidas", async (req, res) => {
         res.status(500).json({ message: "Error 500"});
     }
 });
-
 
 
 // ROTA PARA REMOVER UMA COMIDA FAVORITA - DELETE
