@@ -13,7 +13,7 @@ router.post ("/avaliacaos", async (req,res) => {
         const cliente = await Cliente.findByPk(clienteId)
         const restaurante = await Restaurante.findByPk(restauranteId)
         const pedido = await Pedido.findByPk(pedidoId)
-        if (cliente && (restaurante || pedido)) {
+        if (pedido && pedido.status === "Entregue" && cliente && (restaurante || pedido)) {
             const avaliar = await Avaliacao.create({avaliacao, comentario, clienteId, restauranteId, pedidoId})
             res.status(200).json(avaliar);
         } else {
