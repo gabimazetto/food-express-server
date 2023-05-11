@@ -4,6 +4,8 @@ const { Comida } = require("../database/comida");
 const Restaurante = require("../database/restaurante");
 const Favorito = require("../database/favorito");
 const router = Router(); 
+const { Op } = require("sequelize");
+
 
 // Adicionando Restaurante Favorito
 router.post("/favoritos/restaurantes", async (req, res) => {
@@ -43,6 +45,63 @@ router.post("/favoritos/comidas", async (req, res) => {
     }
 });
 
+
+
+router.get("/favoritos/comidas/:clienteId", async (req, res) => {
+    const { clienteId } = req.params;
+
+    try {
+        const favoritos = await Favorito.findAll({
+            where: {
+                comidaId: {
+                    [Op.ne]: null,
+                },
+                clienteId: clienteId,
+            },
+            include: [
+                {
+                    model: Comida,
+                    attributes: ["id", "nome", "descricao", "preco", "restauranteId"],
+                    include: [
+                        {
+                            model: Restaurante,
+                            attributes: ["nomeFantasia"],
+                        },
+                    ],
+                },
+            ],
+        });
+
+        const comidaIds = favoritos.map((favorito) => favorito.comidaId);
+        const comidasFavoritadasUnico = Array.from(new Set(comidaIds));
+
+        const comidasFavoritadas = await Comida.findAll({
+            where: {
+                id: {
+                    [Op.in]: comidasFavoritadasUnico,
+                },
+            },
+            attributes: ["id", "nome", "descricao", "preco", "restauranteId"],
+            include: [
+                {
+                    model: Restaurante,
+                    attributes: ["nomeFantasia"],
+                },
+            ],
+        });
+
+        if (comidasFavoritadas.length > 0) {
+            res.status(200).json(comidasFavoritadas);
+        } else {
+            res.status(404).json({ message: "Nenhuma comida favorita encontrada para este cliente" });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Erro 500" });
+    }
+});
+
+
 // Listar Comida(s) Favorita(s)
 router.get("/favoritos/comidas", async (req, res) => {
     const clienteId = req.params.clienteId
@@ -54,6 +113,7 @@ router.get("/favoritos/comidas", async (req, res) => {
         res.status(500).json({ message: "Error 500"});
     }
 });
+
 
 // ROTA PARA REMOVER UMA COMIDA FAVORITA - DELETE
 router.delete("/favoritos/comidas/:id", async (req, res) => {
