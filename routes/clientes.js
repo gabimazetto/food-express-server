@@ -4,19 +4,29 @@ const Cliente = require("../database/cliente");
 const Endereco = require("../database/endereco");
 const Pedido = require("../database/pedido");
 const { Router } = require("express");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 // Criar o grupo de rotas (/clientes);
 const router = Router();
 
 // Definição de rotas
 
-// POST - ROTA PARA ADICIONAR UM CLIENTE
+
+//INCIO JWT
+// POST - ROTA PARA ADICIONAR UM CLIENTE COM SENHA CRIPTOGRAFADA (brcypt);
 router.post("/clientes", async (req, res) => {
-    const { nome, email, senha, telefone, cpf, dataNascimento, endereco } =
-        req.body;
+    const { nome, email, senha, confirmarSenha, telefone, cpf, dataNascimento, endereco } = req.body;
     try {
+        const salt = await bcrypt.genSalt(12);
+        const senhaHash = await bcrypt.hash(senha, salt);
+        if (senha != confirmarSenha) {
+            return res
+                .status(422)
+                .json({ msg: "A senha e a confirmação precisam ser iguais!" });
+        }
         const novo = await Cliente.create(
-            { nome, email, senha, telefone, cpf, dataNascimento, endereco },
+            { nome, email, senha: senhaHash, telefone, cpf, dataNascimento, endereco },
             { include: [Endereco] }
         );
         res.status(201).json({ novo, message: "Cliente adicionado com sucesso" });
@@ -26,11 +36,78 @@ router.post("/clientes", async (req, res) => {
     }
 });
 
-// ROTA PARA LISTAR TODOS OS CLIENTES - GET
-router.get("/clientes", async (req, res) => {
-    const listaClientes = await Cliente.findAll();
-    res.json(listaClientes);
+//ROTA LOGIN -> CRIANDO TOKEN
+router.post("/clientes/login", async (req, res) => {
+    const { email, senha } = req.body;
+    // validações
+    if (!email) {
+        return res.status(422).json({ msg: "O email é obrigatório!" });
+    }
+    if (!senha) {
+        return res.status(422).json({ msg: "A senha é obrigatória!" });
+    }
+    // checar se o cliente existe
+    const cliente = await Cliente.findOne({ where: { email: email } });
+    if (!cliente) {
+        return res.status(404).json({ msg: "Usuário não encontrado!" });
+    }
+    // checar se a senha está correta
+    const checkSenha = await bcrypt.compare(senha, cliente.senha);
+    if (!checkSenha) {
+        return res.status(422).json({ msg: "Senha inválida" });
+    }
+    try {
+        const secret = process.env.SECRET;
+        const token = jwt.sign(
+            {
+                id: cliente.id,
+                email: cliente.email,
+                role: 'cliente' // adicionando a informação de role
+            },
+            secret
+        );
+        res.status(200).json({ msg: "Autenticação realizada com sucesso!", token });
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ msg: error });
+    }
 });
+
+//FUNÇÃO DE AUTENTICAÇÃO DO TOKEN;
+function checkToken(req, res, next) {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    if (!token) return res.status(401).json({ msg: "Acesso negado!" });
+    try {
+        const secret = process.env.SECRET;
+        jwt.verify(token, secret);
+        next();
+    } catch (err) {
+        res.status(400).json({ msg: "O Token é inválido!" });
+    }
+};
+
+
+//ACESSO A ROTA PRIVADA COM UTILIZAÇÃO DO TOKEN
+router.get("/clientes/home/:id", checkToken, async (req, res) => {
+    const { id } = req.params;
+    // checar se o cliente existe
+    const cliente = await Cliente.findByPk(id);
+    if (!cliente) {
+        return res.status(404).json({ msg: "Usuário não encontrado!" });
+    }
+    res.status(200).json({ msg: "Bem vindo a esta rota privada" });
+});
+
+//ROTA PUBLICA SEM NECESSIDADE DO TOKEN
+router.get("/", (req, res) => {
+    res.status(200).json({ msg: "Bem vindo a API!" });
+});
+
+//FIM JWT
+
+
+
 
 // ROTA PARA LISTAR UM CLIENTE POR ID - GET
 router.get("/clientes/:id", async (req, res) => {
@@ -55,30 +132,30 @@ router.get('/clientes/:id/pedidos', async (req, res) => {
     try {
         const pedidos = await Cliente.findAll({
             where: { id: req.params.id }, // Filtra pelo "id" do cliente
-            include: [ Pedido ], 
-          });
-  
-      res.json(pedidos);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Erro ao buscar pedidos do cliente' });
-    }
-  });
+            include: [Pedido],
+        });
 
-  // ROTA PARA FILTRAR TODAS AS AVALIAÇÕES FEITAS POR CLIENTE
+        res.json(pedidos);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao buscar pedidos do cliente' });
+    }
+});
+
+// ROTA PARA FILTRAR TODAS AS AVALIAÇÕES FEITAS POR CLIENTE
 router.get('/clientes/:id/avaliacaos', async (req, res) => {
     try {
         const avaliacoes = await Cliente.findAll({
             where: { id: req.params.id }, // Filtra pelo "id" do cliente
-            include: [ Avaliacao ], 
-          });
-  
-      res.json(avaliacoes);
+            include: [Avaliacao],
+        });
+
+        res.json(avaliacoes);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Erro ao buscar pedidos do cliente' });
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao buscar pedidos do cliente' });
     }
-  });
+});
 
 // ROTA PARA ATUALIZAR UM CLIENTE - PUT
 router.put("/clientes/:id", async (req, res) => {
@@ -111,7 +188,7 @@ router.put("/clientes/:id", async (req, res) => {
 
 // ROTA PARA DELETAR UM CLIENTE - DELETE
 router.delete("/clientes/:id", async (req, res) => {
-    const { id } = req.params;    
+    const { id } = req.params;
     const cliente = await Cliente.findOne({ where: { id } });
     try {
         if (cliente) {
