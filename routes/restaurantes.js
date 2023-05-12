@@ -28,7 +28,7 @@ router.get("/restaurantes", async (req, res) => {
     res.json(listaRestaurantes)
 });
 
-// ROTA PARA LISTAR UM RESTAURANTE POR ID - GET
+// ROTA PARA LISTAR UM RESTAURANTE POR ID - GE      T
 router.get("/restaurantes/:id", async (req, res) => {
     try {
         const restaurante = await Restaurante.findOne({
