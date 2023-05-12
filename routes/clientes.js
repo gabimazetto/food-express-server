@@ -74,13 +74,16 @@ router.post("/clientes/login", async (req, res) => {
 });
 
 //FUNÇÃO DE AUTENTICAÇÃO DO TOKEN;
-function checkToken(req, res, next) {
+function checkTokenCliente(req, res, next) {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
     if (!token) return res.status(401).json({ msg: "Acesso negado!" });
     try {
         const secret = process.env.SECRET;
-        jwt.verify(token, secret);
+        const decodedToken = jwt.verify(token, secret);
+        if (decodedToken.role !== "cliente") {
+            return res.status(403).json({ msg: "Acesso negado!" });
+        }
         next();
     } catch (err) {
         res.status(400).json({ msg: "O Token é inválido!" });
@@ -89,7 +92,7 @@ function checkToken(req, res, next) {
 
 
 //ACESSO A ROTA PRIVADA COM UTILIZAÇÃO DO TOKEN
-router.get("/clientes/home/:id", checkToken, async (req, res) => {
+router.get("/clientes/home/:id", checkTokenCliente, async (req, res) => {
     const { id } = req.params;
     // checar se o cliente existe
     const cliente = await Cliente.findByPk(id);

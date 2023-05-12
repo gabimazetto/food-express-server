@@ -3,27 +3,115 @@ const Restaurante = require("../database/restaurante");
 const Endereco = require("../database/endereco");
 const { Op } = require("sequelize");
 const { Comida } = require("../database/comida");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
 
 const router = Router();
 
-// ROTA PARA ADICIONAR UM RETAURANTE - POST
+//INCIO JWT
+// POST - ROTA PARA ADICIONAR UM RESTAURANTE COM SENHA CRIPTOGRAFADA (brcypt);
 router.post("/restaurantes", async (req, res) => {
-    const { nomeFantasia, razaoSocial, cnpj, email, senha, endereco } = req.body;
+    const { nomeFantasia, razaoSocial, cnpj, email, senha, confirmarSenha, endereco } = req.body;
     try {
+        const salt = await bcrypt.genSalt(12);
+        const senhaHash = await bcrypt.hash(senha, salt);
+        if (senha != confirmarSenha) {
+            return res
+                .status(422)
+                .json({ msg: "A senha e a confirmação precisam ser iguais!" });
+        }
         const novo = await Restaurante.create(
-            { nomeFantasia, razaoSocial, cnpj, email, senha, endereco },
+            { nomeFantasia, razaoSocial, cnpj, email, senha: senhaHash, confirmarSenha, endereco },
             { include: [Endereco] }
         );
-        res.status(201).json(novo);
+        res.status(201).json({ novo, message: "Restaurante adicionado com sucesso" });
     } catch (err) {
-        res.status(500).send('Ocorreu um erro. Por favor, tente novamente mais tarde.');
+        console.log(err);
+        res.status(500).json({ message: "Um erro aconteceu" });
     }
 });
+
+//ROTA LOGIN -> CRIANDO TOKEN
+router.post("/restaurantes/login", async (req, res) => {
+    const { email, senha } = req.body;
+    // validações
+    if (!email) {
+        return res.status(422).json({ msg: "O email é obrigatório!" });
+    }
+    if (!senha) {
+        return res.status(422).json({ msg: "A senha é obrigatória!" });
+    }
+    // checar se o restaurante existe
+    const restaurante = await Restaurante.findOne({ where: { email: email } });
+    if (!restaurante) {
+        return res.status(404).json({ msg: "Usuário não encontrado!" });
+    }
+    // checar se a senha está correta
+    const checkSenha = await bcrypt.compare(senha, restaurante.senha);
+    if (!checkSenha) {
+        return res.status(422).json({ msg: "Senha inválida" });
+    }
+    try {
+        const secret = process.env.SECRET;
+        const token = jwt.sign(
+            {
+                id: restaurante.id,
+                email: restaurante.email,
+                role: 'restaurante' // adicionando a informação de role
+            },
+            secret
+        );
+        res.status(200).json({ msg: "Autenticação realizada com sucesso!", token });
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ msg: error });
+    }
+});
+
+//FUNÇÃO DE AUTENTICAÇÃO DO TOKEN;
+function checkTokenRestaurante(req, res, next) {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    if (!token) return res.status(401).json({ msg: "Acesso negado!" });
+    try {
+        const secret = process.env.SECRET;
+        const decodedToken = jwt.verify(token, secret);
+        if (decodedToken.role !== "restaurante") {
+            return res.status(403).json({ msg: "Acesso negado!" });
+        }
+        next();
+    } catch (err) {
+        res.status(400).json({ msg: "O Token é inválido!" });
+    }
+};
+
+
+//ACESSO A ROTA PRIVADA COM UTILIZAÇÃO DO TOKEN
+router.get("/restaurantes/home/:id", checkTokenRestaurante, async (req, res) => {
+    const { id } = req.params;
+    // checar se o restaurante existe
+    const restaurante = await Restaurante.findByPk(id);
+    if (!restaurante) {
+        return res.status(404).json({ msg: "Restaurante não encontrado!" });
+    }
+    res.status(200).json({ msg: "Bem vindo a esta rota privada" });
+});
+
+//ROTA PUBLICA SEM NECESSIDADE DO TOKEN
+router.get("/", (req, res) => {
+    res.status(200).json({ msg: "Bem vindo a API!" });
+});
+
+//FIM JWT
+
+
+
 
 
 router.get("/restaurantes", async (req, res) => {
     const listaRestaurantes = await Restaurante.findAll({
-        include:[Endereco]
+        include: [Endereco]
     });
     res.json(listaRestaurantes)
 });
@@ -33,7 +121,7 @@ router.get("/restaurantes/:id", async (req, res) => {
     try {
         const restaurante = await Restaurante.findOne({
             where: { id: req.params.id },
-            include:[Endereco]
+            include: [Endereco]
         });
         if (restaurante) {
             res.status(201).json(restaurante);
