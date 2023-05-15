@@ -69,7 +69,7 @@ Comida.belongsTo(Restaurante, { foreignKey: "restauranteId" });
 // file.buffer, vai trazer o arquivo que está na memória do computador para upload.
 async function uploadImagemComida(file) {
     const filename = file.originalname;
-    const imageRef = ref(storage, `refeições/${filename}`);
+    const imageRef = ref(storage, `refeições/${filename}-${Date.now()}`);
     const result = await uploadBytes(imageRef, file.buffer);
     return await getDownloadURL(result.ref);
 }
