@@ -51,6 +51,39 @@ router.get("/pedidos", async (req, res) => {
                     attributes: ["nomeFantasia"]
                 },
             ],
+            order: [["dataRegistro", "ASC"]]
+        });
+        res.status(200).json(pedidos);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Um erro aconteceu." });
+    }
+});
+
+// ROTA PARA LISTAR PEDIDOS EFETUADOS PELO CLIENTE
+router.get("/pedidos/cliente/:clienteId", async (req, res) => {
+    const { clienteId } = req.params;
+    try {
+        const pedidos = await Pedido.findAll({
+            where: { clienteId: clienteId },
+            include: [
+                {
+                    model: Item,
+                    attributes: ["quantidade"],
+                    include: [{
+                            model: Comida,
+                            attributes: ["nome"]
+                        }]
+                },
+                {
+                    model: Cliente,
+                    include: Endereco
+                },
+                {
+                    model: Restaurante,
+                    attributes: ["nomeFantasia"]
+                },
+            ],
             order: [["dataRegistro", "DESC"]]
         });
         res.status(200).json(pedidos);
@@ -59,6 +92,8 @@ router.get("/pedidos", async (req, res) => {
         res.status(500).json({ message: "Um erro aconteceu." });
     }
 });
+
+
 
 // ROTA PARA ATUALIZAR UM PEDIDO - PUT
 router.put("/pedidos/:id", async (req, res) => {
