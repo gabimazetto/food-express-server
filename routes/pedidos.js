@@ -120,7 +120,7 @@ router.get("/pedidos/restaurante/:restauranteId", async (req, res) => {
                         attributes: ["nomeFantasia"]
                     },
                 ],
-                order: [["dataRegistro", "DESC"]]
+                order: [["dataRegistro", "ASC"]]
             });
             res.status(200).json(pedidos);
         } else {
@@ -144,7 +144,7 @@ router.get("/pedidos/restaurante/:restauranteId", async (req, res) => {
                         attributes: ["nomeFantasia"]
                     },
                 ],
-                order: [["dataRegistro", "DESC"]]
+                order: [["dataRegistro", "ASC"]]
             });
             res.status(200).json(pedidos);
         }
