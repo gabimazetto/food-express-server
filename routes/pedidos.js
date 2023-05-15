@@ -94,6 +94,66 @@ router.get("/pedidos/cliente/:clienteId", async (req, res) => {
 });
 
 
+// ROTA PARA LISTAR PEDIDOS RECEBIDOS PELO RESTAURANTE
+router.get("/pedidos/restaurante/:restauranteId", async (req, res) => {
+    const { restauranteId } = req.params;
+    const { status } = req.query;
+    try {
+        if (status){
+            const pedidos = await Pedido.findAll({
+                where: { restauranteId: restauranteId, status: status },
+                include: [
+                    {
+                        model: Item,
+                        attributes: ["quantidade"],
+                        include: [{
+                                model: Comida,
+                                attributes: ["nome"]
+                            }]
+                    },
+                    {
+                        model: Cliente,
+                        include: Endereco
+                    },
+                    {
+                        model: Restaurante,
+                        attributes: ["nomeFantasia"]
+                    },
+                ],
+                order: [["dataRegistro", "DESC"]]
+            });
+            res.status(200).json(pedidos);
+        } else {
+            const pedidos = await Pedido.findAll({
+                where: { restauranteId: restauranteId },
+                include: [
+                    {
+                        model: Item,
+                        attributes: ["quantidade"],
+                        include: [{
+                                model: Comida,
+                                attributes: ["nome"]
+                            }]
+                    },
+                    {
+                        model: Cliente,
+                        include: Endereco
+                    },
+                    {
+                        model: Restaurante,
+                        attributes: ["nomeFantasia"]
+                    },
+                ],
+                order: [["dataRegistro", "DESC"]]
+            });
+            res.status(200).json(pedidos);
+        }
+        
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Um erro aconteceu." });
+    }
+});
 
 // ROTA PARA ATUALIZAR UM PEDIDO - PUT
 router.put("/pedidos/:id", async (req, res) => {
