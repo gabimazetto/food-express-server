@@ -12,6 +12,10 @@ const Restaurante = connection.define("restaurante", {
     allowNull: false,
     unique: true
   },
+  telefone: {
+    type: DataTypes.STRING(14),
+    allowNull: false,
+  },
   cnpj: {
     type: DataTypes.STRING(18),
     allowNull: false,

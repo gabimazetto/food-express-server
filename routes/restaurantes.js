@@ -12,7 +12,7 @@ const router = Router();
 //INCIO JWT
 // POST - ROTA PARA ADICIONAR UM RESTAURANTE COM SENHA CRIPTOGRAFADA (brcypt);
 router.post("/restaurantes", async (req, res) => {
-    const { nomeFantasia, razaoSocial, cnpj, email, senha, confirmarSenha, endereco } = req.body;
+    const { nomeFantasia, razaoSocial, telefone, cnpj, email, senha, confirmarSenha, endereco } = req.body;
     try {
         const salt = await bcrypt.genSalt(12);
         const senhaHash = await bcrypt.hash(senha, salt);
@@ -22,7 +22,7 @@ router.post("/restaurantes", async (req, res) => {
                 .json({ msg: "A senha e a confirmação precisam ser iguais!" });
         }
         const novo = await Restaurante.create(
-            { nomeFantasia, razaoSocial, cnpj, email, senha: senhaHash, confirmarSenha, endereco },
+            { nomeFantasia, razaoSocial, telefone, cnpj, email, senha: senhaHash, confirmarSenha, endereco },
             { include: [Endereco] }
         );
         res.status(201).json({ novo, message: "Restaurante adicionado com sucesso" });
@@ -199,7 +199,7 @@ router.get("/restaurantes/:id/cardapio/", async (req, res) => {
 
 //ROTA PARA ATUALIZAR UM RESTAURANTE - PUT
 router.put("/restaurantes/:id", async (req, res) => {
-    const { nomeFantasia, razaoSocial, cnpj, email, senha, endereco } = req.body;
+    const { nomeFantasia, razaoSocial, telefone, cnpj, email, senha, endereco } = req.body;
     const { id } = req.params;
     try {
         const restauranteAtt = await Restaurante.findByPk(id);
@@ -208,7 +208,7 @@ router.put("/restaurantes/:id", async (req, res) => {
             if (endereco) {
                 await Endereco.update(endereco, { where: { restauranteId: id } })
             }
-            await restauranteAtt.update({ nomeFantasia, razaoSocial, cnpj, email, senha });
+            await restauranteAtt.update({ nomeFantasia, razaoSocial, telefone, cnpj, email, senha });
             res.status(200).json({ message: "Restaurante editado." })
         } else {
             res.status(404).json({ message: "Restaurante não encontrado" })
