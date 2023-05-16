@@ -8,7 +8,7 @@ const { Op } = require("sequelize");
 
 
 // Adicionando Restaurante Favorito
-router.post("/favoritos/restaurantes", async (req, res) => {
+router.post("/restaurantes/favoritos", async (req, res) => {
     const { favoritar, restauranteId, clienteId } = req.body;
     try {
         const cliente = await Cliente.findByPk(clienteId);
@@ -27,7 +27,7 @@ router.post("/favoritos/restaurantes", async (req, res) => {
 });
 
 // Adicionando Comida Favorita
-router.post("/favoritos/comidas", async (req, res) => {
+router.post("/comidas/favoritos", async (req, res) => {
     const { favoritar, comidaId, clienteId } = req.body;
     try {
         const cliente = await Cliente.findByPk(clienteId);
@@ -44,6 +44,7 @@ router.post("/favoritos/comidas", async (req, res) => {
         res.status(500).json({ message: "Error 500"})
     }
 });
+
 
 //Rota GET para listar todas as comidas salvas como favoritas 
 router.get("/favoritos/comidas", async (req, res) => {
