@@ -89,21 +89,24 @@ router.put("/comidas/:id", upload.single("imagem"), async (req, res) => {
       res.status(404).json({ message: "Comida não encontrada." });
       return;
     }
+
     if (codigo && nome && descricao && categoria && preco && peso) {
+      const imagemURL = comida.imagem;
       if (req.file) {
-        const imagemURL = await uploadImagemComida(req.file);
-        const updatedComida = await comida.update({ codigo, nome, descricao, categoria, preco, peso, imagem: imagemURL });
-        res.status(200).json(updatedComida);
+        imagemURL = await uploadImagemComida(req.file);
       }
-    }  else {
+
+      const updatedComida = await comida.update({ codigo, nome, descricao, categoria, preco, peso, imagem: imagemURL });
+      res.status(200).json(updatedComida);
+    } else {
       res.status(400).json({ message: "Requisição inválida." });
     }
-
   } catch (err) {
-    console.log(err)
+    console.log(err);
     res.status(500).json({ message: "Um erro aconteceu." });
   }
 });
+
 
 // ROTA DELETE PARA COMIDA
 router.delete("/comidas/:id", async (req,res) => {
