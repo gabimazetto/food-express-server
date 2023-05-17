@@ -45,6 +45,7 @@ router.post("/comidas", upload.single("imagem"), async (req, res) => {
       res.status(400).json({ message: "Requisição inválida." });
     }
   } catch (err) {
+    console.log(err)
     res.status(500).json({ message: "Um erro aconteceu." });
   }
 });

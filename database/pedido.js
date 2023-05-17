@@ -3,6 +3,7 @@ const { connection } = require("./database");
 const Cliente = require("./cliente");
 const Item = require("./item");
 const Restaurante = require("./restaurante");
+const EnderecoPedido = require("./enderecoPedido");
 
 const Pedido = connection.define(
   "pedido",
@@ -54,5 +55,8 @@ Pedido.belongsTo(Cliente, { foreignKey: "clienteId" });
 
 Restaurante.hasMany(Pedido, { foreignKey: "restauranteId" });
 Pedido.belongsTo(Restaurante, { foreignKey: "restauranteId" });
+
+Pedido.hasOne(EnderecoPedido, { foreignKey: "pedidoId" });
+EnderecoPedido.belongsTo(Pedido, { foreignKey: "pedidoId" });
 
 module.exports = Pedido;
