@@ -5,48 +5,27 @@ const Item = require("./item");
 const Restaurante = require("./restaurante");
 const EnderecoPedido = require("./enderecoPedido");
 
-const Pedido = connection.define(
-  "pedido",
-  {
-    dataRegistro: {
-      type: DataTypes.DATEONLY,
-      allowNull: false,
-    },
-    status: {
-      type: DataTypes.STRING,
-      defaultValue: "Pendente",
-      validate: {
-        isIn: [
-          [
-            "Pendente",
-            "Aguardando confirmação",
-            "Confirmado",
-            "A caminho",
-            "Entregue",
-            "Cancelado",
-          ],
-        ],
-      },
-      metodoPagamento: {
-        type: DataTypes.STRING,
-        validate: {
-          isIn: [
-            [
-              "Cartão de crédito",
-              "Cartão de débito",
-              "Dinheiro",
-              "PIX",
-              "VR",
-              "VA",
-              "Carteira Digital",
-            ],
-          ],
-        },
-      },
-    },
+
+const Pedido = connection.define("pedido", {
+  dataRegistro: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
   },
-  { paranoid: true }
-);
+  status: {
+    type: DataTypes.STRING,
+    defaultValue: "Pendente",
+    validate: {
+      isIn: [["Pendente", "Aguardando confirmação", "Confirmado", "A caminho", "Entregue", "Cancelado"]]
+    }
+  },
+  metodoPagamento: {
+    type: DataTypes.STRING,
+    validate: {
+      isIn: [["Cartão de crédito", "Cartão de débito", "Dinheiro", "PIX", "VR", "VA", "Carteira Digital"]]
+    },
+  }
+}, { paranoid: true });
+
 
 Item.hasMany(Pedido, { foreignKey: "itemId" });
 Pedido.belongsTo(Item, { foreignKey: "itemId" });
