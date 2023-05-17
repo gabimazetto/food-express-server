@@ -1,7 +1,7 @@
 const Joi = require("joi");
 
 const validacaoPedido = Joi.object({
-  dataRegistro: Joi.date().min("now").required(),
+  dataRegistro: Joi.date().max("now").required(),
   status: Joi.string()
     .default("Pendente")
     .valid(
@@ -26,6 +26,13 @@ const validacaoPedido = Joi.object({
       "VA",
       "Carteira Digital"
     ),
+  enderecoPedido: {
+    rua: Joi.string().required(),
+    bairro: Joi.string().required(),
+    numero: Joi.string().required(),
+    cep: Joi.string().max(9).required(),
+    complemento: Joi.string(),
+  },
 });
 
 const validacaoPedidoAtt = Joi.object({

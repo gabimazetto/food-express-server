@@ -20,25 +20,28 @@ router.post("/pedidos", async (req, res) => {
     restauranteId,
     itemId,
     metodoPagamento,
- , enderecoPedido } = req.body;
+    enderecoPedido,
+  } = req.body;
   try {
     const cliente = await Cliente.findByPk(clienteId);
     const restaurante = await Restaurante.findByPk(restauranteId);
     const item = await Item.findByPk(itemId);
-    const { error, value } = validacaoPedido.validate(req.body);
+    const { error, value } = validacaoPedido.validateAsync(req.body);
     if (error) {
       return res.status(520).json({ msg: " Erro na validação do Joi" });
     } else if (cliente && restaurante && item) {
-      const pedido = await Pedido.create({
-        dataRegistro,
-        status,
-        clienteId,
-        restauranteId,
-        itemId,
-        metodoPagamento,
-     , enderecoPedido },
-                { include: [EnderecoPedido] }
-            );
+      const pedido = await Pedido.create(
+        {
+          dataRegistro,
+          status,
+          clienteId,
+          restauranteId,
+          itemId,
+          metodoPagamento,
+          enderecoPedido,
+        },
+        { include: [EnderecoPedido] }
+      );
       res.status(201).json(pedido);
     } else {
       res.status(404).json({ message: "Pedido não pode ser adicionado" });
@@ -51,133 +54,140 @@ router.post("/pedidos", async (req, res) => {
 
 // ROTA PARA LISTAR PEDIDOS ORDENADOS POR DATA - GET
 router.get("/pedidos", async (req, res) => {
-    try {
-        const pedidos = await Pedido.findAll({
-            include: [
-                {
-                    model: Item,
-                    attributes: ["quantidade"],
-                    include: [{
-                        model: Comida,
-                        attributes: ["nome"]
-                    }]
-                },
-                {
-                    model: Cliente,
-                },
-                {
-                    model: EnderecoPedido,
-                },
-                {
-                    model: Restaurante,
-                    attributes: ["nomeFantasia", "cnpj", "telefone"]
-                },
-            ],
-            order: [["dataRegistro", "ASC"]]
-        });
-        res.status(200).json(pedidos);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Um erro aconteceu." });
-    }
+  try {
+    const pedidos = await Pedido.findAll({
+      include: [
+        {
+          model: Item,
+          attributes: ["quantidade"],
+          include: [
+            {
+              model: Comida,
+              attributes: ["nome"],
+            },
+          ],
+        },
+        {
+          model: Cliente,
+        },
+        {
+          model: EnderecoPedido,
+        },
+        {
+          model: Restaurante,
+          attributes: ["nomeFantasia", "cnpj", "telefone"],
+        },
+      ],
+      order: [["dataRegistro", "ASC"]],
+    });
+    res.status(200).json(pedidos);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Um erro aconteceu." });
+  }
 });
 
 // ROTA PARA LISTAR PEDIDOS EFETUADOS PELO CLIENTE
 router.get("/pedidos/cliente/:clienteId", async (req, res) => {
-    const { clienteId } = req.params;
-    try {
-        const pedidos = await Pedido.findAll({
-            where: { clienteId: clienteId },
-            include: [
-                {
-                    model: Item,
-                    attributes: ["quantidade"],
-                    include: [{
-                        model: Comida,
-                        attributes: ["nome"]
-                    }]
-                },
-                {
-                    model: Cliente,
-                },
-                {
-                    model: EnderecoPedido,
-                },
-                {
-                    model: Restaurante,
-                    attributes: ["nomeFantasia"]
-                },
-            ],
-            order: [["dataRegistro", "DESC"]]
-        });
-        res.status(200).json(pedidos);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Um erro aconteceu." });
-    }
+  const { clienteId } = req.params;
+  try {
+    const pedidos = await Pedido.findAll({
+      where: { clienteId: clienteId },
+      include: [
+        {
+          model: Item,
+          attributes: ["quantidade"],
+          include: [
+            {
+              model: Comida,
+              attributes: ["nome"],
+            },
+          ],
+        },
+        {
+          model: Cliente,
+        },
+        {
+          model: EnderecoPedido,
+        },
+        {
+          model: Restaurante,
+          attributes: ["nomeFantasia"],
+        },
+      ],
+      order: [["dataRegistro", "DESC"]],
+    });
+    res.status(200).json(pedidos);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Um erro aconteceu." });
+  }
 });
 
 // ROTA PARA LISTAR PEDIDOS RECEBIDOS PELO RESTAURANTE
 router.get("/pedidos/restaurante/:restauranteId", async (req, res) => {
-    const { restauranteId } = req.params;
-    const { status } = req.query;
-    try {
-        if (status) {
-            const pedidos = await Pedido.findAll({
-                where: { restauranteId: restauranteId, status: status },
-                include: [
-                    {
-                        model: Item,
-                        attributes: ["quantidade"],
-                        include: [{
-                            model: Comida,
-                            attributes: ["nome"]
-                        }]
-                    },
-                    {
-                        model: Cliente,
-                    },
-                    {
-                        model: EnderecoPedido,
-                    },
-                    {
-                        model: Restaurante,
-                        attributes: ["nomeFantasia"]
-                    },
-                ],
-                order: [["dataRegistro", "ASC"]]
-            });
-            res.status(200).json(pedidos);
-        } else {
-            const pedidos = await Pedido.findAll({
-                where: { restauranteId: restauranteId },
-                include: [
-                    {
-                        model: Item,
-                        attributes: ["quantidade"],
-                        include: [{
-                            model: Comida,
-                            attributes: ["nome"]
-                        }]
-                    },
-                    {
-                        model: Cliente,
-                        include: Endereco
-                    },
-                    {
-                        model: Restaurante,
-                        attributes: ["nomeFantasia"]
-                    },
-                ],
-                order: [["dataRegistro", "ASC"]]
-            });
-            res.status(200).json(pedidos);
-        }
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Um erro aconteceu." });
+  const { restauranteId } = req.params;
+  const { status } = req.query;
+  try {
+    if (status) {
+      const pedidos = await Pedido.findAll({
+        where: { restauranteId: restauranteId, status: status },
+        include: [
+          {
+            model: Item,
+            attributes: ["quantidade"],
+            include: [
+              {
+                model: Comida,
+                attributes: ["nome"],
+              },
+            ],
+          },
+          {
+            model: Cliente,
+          },
+          {
+            model: EnderecoPedido,
+          },
+          {
+            model: Restaurante,
+            attributes: ["nomeFantasia"],
+          },
+        ],
+        order: [["dataRegistro", "ASC"]],
+      });
+      res.status(200).json(pedidos);
+    } else {
+      const pedidos = await Pedido.findAll({
+        where: { restauranteId: restauranteId },
+        include: [
+          {
+            model: Item,
+            attributes: ["quantidade"],
+            include: [
+              {
+                model: Comida,
+                attributes: ["nome"],
+              },
+            ],
+          },
+          {
+            model: Cliente,
+            include: Endereco,
+          },
+          {
+            model: Restaurante,
+            attributes: ["nomeFantasia"],
+          },
+        ],
+        order: [["dataRegistro", "ASC"]],
+      });
+      res.status(200).json(pedidos);
     }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Um erro aconteceu." });
+  }
 });
 
 // ROTA PARA ATUALIZAR UM PEDIDO - PUT
@@ -219,43 +229,43 @@ router.delete("/pedidos/:id", async (req, res) => {
 
 //ROTA PARA LISTAR PEDIDO DE DETERMINADO CLIENTE
 router.get("/pedidos/cliente/:clienteId/:pedidoId", async (req, res) => {
-    const { clienteId, pedidoId } = req.params;
-    try {
-        const pedido = await Pedido.findOne({
-            where: { clienteId: clienteId, id: pedidoId },
-            include: [
-                {
-                    model: Item,
-                    attributes: ["quantidade"],
-                    include: [
-                        {
-                            model: Comida,
-                            attributes: ["nome", "preco"]
-                        }
-                    ]
-                },
-                {
-                    model: Cliente,
-                },
-                {
-                    model: EnderecoPedido,
-                },
-                {
-                    model: Restaurante,
-                    attributes: ["nomeFantasia", "cnpj", "telefone"]
-                },
-            ],
-        });
+  const { clienteId, pedidoId } = req.params;
+  try {
+    const pedido = await Pedido.findOne({
+      where: { clienteId: clienteId, id: pedidoId },
+      include: [
+        {
+          model: Item,
+          attributes: ["quantidade"],
+          include: [
+            {
+              model: Comida,
+              attributes: ["nome", "preco"],
+            },
+          ],
+        },
+        {
+          model: Cliente,
+        },
+        {
+          model: EnderecoPedido,
+        },
+        {
+          model: Restaurante,
+          attributes: ["nomeFantasia", "cnpj", "telefone"],
+        },
+      ],
+    });
 
-        if (!pedido) {
-            return res.status(404).json({ message: "Pedido não encontrado." });
-        }
-
-        res.status(200).json(pedido);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Um erro aconteceu." });
+    if (!pedido) {
+      return res.status(404).json({ message: "Pedido não encontrado." });
     }
+
+    res.status(200).json(pedido);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Um erro aconteceu." });
+  }
 });
 
 module.exports = router;

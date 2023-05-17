@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Item = require("../database/item");
 const { Comida } = require("../database/comida");
-const { validacaoItem } = require("../validation/comida");
+const validacaoItem = require("../validation/item");
 
 // ROTA PARA ADICIONAR UM ITEM - POST
 router.post("/itens", async (req, res) => {
@@ -30,7 +30,7 @@ router.post("/itens", async (req, res) => {
       });
     }
   } catch (err) {
-    res.status(500).json({ message: "Um erro aconteceu" });
+    res.status(500).json({ message: err.message });
   }
 });
 

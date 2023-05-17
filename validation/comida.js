@@ -1,8 +1,54 @@
 const Joi = require("joi");
 
-const validacaoItem = Joi.object({
-  quantidade: Joi.number().required(),
-  comidaId: Joi.number().required(),
+const validacaoComida = Joi.object({
+  codigo: Joi.string().required(), //unique,
+  nome: Joi.string().max(130),
+  descricao: Joi.string().required(),
+  categoria: Joi.string().valid(
+    "Açaí",
+    "Lanche",
+    "Pizza",
+    "Brasileira",
+    "Italiana",
+    "Sobremesa",
+    "Japonesa",
+    "Chinesa",
+    "Vegetariana",
+    "Padaria",
+    "Marmita",
+    "Carne",
+    "Fit",
+    "Árabe"
+  ),
+  preco: Joi.string().required(),
+  peso: Joi.number().required(),
+  imagem: Joi.optional(),
+  restauranteId: Joi.number().required(),
 });
 
-module.exports = { validacaoItem };
+const validacaoComidaAtt = Joi.object({
+  codigo: Joi.string().required(), //unique,
+  nome: Joi.string().max(130),
+  descricao: Joi.string().required(),
+  categoria: Joi.string().valid(
+    "Açaí",
+    "Lanche",
+    "Pizza",
+    "Brasileira",
+    "Italiana",
+    "Sobremesa",
+    "Japonesa",
+    "Chinesa",
+    "Vegetariana",
+    "Padaria",
+    "Marmita",
+    "Carne",
+    "Fit",
+    "Árabe"
+  ),
+  preco: Joi.string().required(),
+  peso: Joi.number().required(),
+  imagem: Joi.string(),
+});
+
+module.exports = { validacaoComida, validacaoComidaAtt };
