@@ -90,6 +90,26 @@ function checkTokenCliente(req, res, next) {
     }
 };
 
+//FUNÇÃO DE AUTENTICAÇÃO DO TOKEN QUE DEVOLVE O PAYLOAD;
+function checkTokenClienteDecoded(req, res, next) {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    if (!token) return res.status(401).json({ msg: "Acesso negado!" });
+    try {
+        const secret = process.env.SECRET;
+        const decodedToken = jwt.verify(token, secret);
+        if (decodedToken.role !== "cliente") {
+            return res.status(403).json({ msg: "Acesso negado!" });
+        }
+        else if(decodedToken.role === "cliente"){
+            req.decodedToken = decodedToken;
+            next();
+        }
+    } catch (err) {
+        res.status(400).json({ msg: "O Token é inválido!" });
+    }
+};
+
 
 //ACESSO A ROTA PRIVADA COM UTILIZAÇÃO DO TOKEN
 router.get("/clientes/home/:id", checkTokenCliente, async (req, res) => {
@@ -100,6 +120,12 @@ router.get("/clientes/home/:id", checkTokenCliente, async (req, res) => {
         return res.status(404).json({ msg: "Usuário não encontrado!" });
     }
     res.status(200).json({ msg: "Bem vindo a esta rota privada" });
+});
+
+//DEVOLVE OS DADOS DO PAYLOAD DECODIFICADO
+router.get("/clientes/home", checkTokenClienteDecoded, (req, res) => {
+    const decodedToken = req.decodedToken;
+    res.json(decodedToken);
 });
 
 //ROTA PUBLICA SEM NECESSIDADE DO TOKEN
