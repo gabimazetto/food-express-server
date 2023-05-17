@@ -86,6 +86,26 @@ function checkTokenRestaurante(req, res, next) {
     }
 };
 
+//FUNÇÃO DE AUTENTICAÇÃO DO TOKEN QUE DEVOLVE O PAYLOAD;
+function checkTokenRestauranteDecoded(req, res, next) {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    if (!token) return res.status(401).json({ msg: "Acesso negado!" });
+    try {
+        const secret = process.env.SECRET;
+        const decodedToken = jwt.verify(token, secret);
+        if (decodedToken.role !== "restaurante") {
+            return res.status(403).json({ msg: "Acesso negado!" });
+        } else if (decodedToken.role === "restaurante"){
+            req.decodedToken = decodedToken;
+            next();
+        }
+        
+    } catch (err) {
+        res.status(400).json({ msg: "O Token é inválido!" });
+    }
+};
+
 
 //ACESSO A ROTA PRIVADA COM UTILIZAÇÃO DO TOKEN
 router.get("/restaurantes/home/:id", checkTokenRestaurante, async (req, res) => {
@@ -96,6 +116,12 @@ router.get("/restaurantes/home/:id", checkTokenRestaurante, async (req, res) => 
         return res.status(404).json({ msg: "Restaurante não encontrado!" });
     }
     res.status(200).json({ msg: "Bem vindo a esta rota privada" });
+});
+
+//DEVOLVE OS DADOS DO PAYLOAD DECODIFICADO
+router.get("/restaurantes/home", checkTokenRestauranteDecoded, (req, res) => {
+    const decodedToken = req.decodedToken;
+    res.json(decodedToken);
 });
 
 //ROTA PUBLICA SEM NECESSIDADE DO TOKEN
