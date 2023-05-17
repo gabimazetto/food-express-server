@@ -47,7 +47,7 @@ const Comida = connection.define(
             },
         },
         preco: {
-            type: DataTypes.FLOAT,
+            type: DataTypes.STRING,
             allowNull: false,
         },
         peso: {
