@@ -13,22 +13,20 @@ const router = Router();
 router.post("/comidas", upload.single("imagem"), async (req, res) => {
   const { codigo, nome, descricao, categoria, preco, peso, restauranteId } = req.body;
   try {
-    if( codigo && nome && descricao && categoria && preco && peso && restauranteId ){
-      // Após receber os dados de upload é possível de passar esses dados para dentro
-      // da função de upload que está no Model de Comida.
+    if (codigo && nome && descricao && categoria && preco && peso && restauranteId) {
       const imagemURL = await uploadImagemComida(req.file);
       const novaComida = await Comida.create({ codigo, nome, descricao, categoria, preco, peso, imagem: imagemURL, restauranteId });
       res.status(201).json(novaComida);
-    } else if ( !restauranteId ){
+    } else if (!restauranteId) {
       res.status(404).json({ message: "Restaurante não encontrado." });
     } else {
       res.status(400).json({ message: "Requisição inválida." });
     }
-    
   } catch (err) {
     res.status(500).json({ message: "Um erro aconteceu." });
   }
 });
+
 
 // ROTA PARA LISTAR TODAS AS COMIDAS
 // router.get("/comidas", async (req, res) => {
@@ -62,7 +60,6 @@ router.get("/comidas", async (req, res) =>{
 })
 
 
-
 // ROTA PARA LISTAR UMA COMIDA POR ID
 router.get("/comidas/:id", async (req, res) => {
   try {
@@ -79,6 +76,24 @@ router.get("/comidas/:id", async (req, res) => {
     res.status(500).json({ message: "Um erro aconteceu." });
   }
 });
+
+// ROTA PARA LISTAR UMA COMIDA POR ID de restaurante
+router.get("/comidas/restaurante/:id", async (req, res) => {
+  try {
+    const comida = await Comida.findOne({
+      where: { restauranteId: req.params.id },
+    });
+    if (comida) {
+      res.status(201).json(comida);
+    } else {
+      res.status(404).json({ message: "Comida não encontrada." });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Um erro aconteceu." });
+  }
+});
+
 
 // ROTA PARA EDITAR COMIDA
 router.put("/comidas/:id", upload.single("imagem"), async (req, res) => {
