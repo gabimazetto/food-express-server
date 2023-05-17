@@ -15,13 +15,13 @@ const Pedido = connection.define("pedido", {
     defaultValue: "Pendente",
     validate: {
       isIn: [["Pendente", "Aguardando confirmação", "Confirmado", "A caminho", "Entregue", "Cancelado"]]
-    },
-    metodoPagamento: {
-      type: DataTypes.STRING,
-      validate: {
-        isIn: [["Cartão de crédito", "Cartão de débito", "Dinheiro", "PIX", "VR", "VA", "Carteira Digital"]]
-      },
     }
+  },
+  metodoPagamento: {
+    type: DataTypes.STRING,
+    validate: {
+      isIn: [["Cartão de crédito", "Cartão de débito", "Dinheiro", "PIX", "VR", "VA", "Carteira Digital"]]
+    },
   }
 }, { paranoid: true });
 
