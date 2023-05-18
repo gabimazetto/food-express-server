@@ -208,9 +208,8 @@ router.get("/restaurante/:nome", async (req, res) => {
 //ROTA PARA LISTAR TODAS COMIDAS DO RESTAURANTE
 router.get("/restaurantes/:id/cardapio/", async (req, res) => {
     try {
-        const restaurante = await Restaurante.findOne({
-            where: { id: req.params.id },
-            include: [Comida]
+        const restaurante = await Comida.findAll({
+            where: { restauranteId: req.params.id },
         });
         if (restaurante) {
             res.status(201).json(restaurante);
