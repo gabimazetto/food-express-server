@@ -5,6 +5,7 @@ const Item = require("./item");
 const Restaurante = require("./restaurante");
 const EnderecoPedido = require("./enderecoPedido");
 
+
 const Pedido = connection.define("pedido", {
   dataRegistro: {
     type: DataTypes.DATEONLY,
@@ -25,10 +26,10 @@ const Pedido = connection.define("pedido", {
   }
 }, { paranoid: true });
 
+
 Item.hasMany(Pedido, { foreignKey: "itemId" });
 Pedido.belongsTo(Item, { foreignKey: "itemId" });
 
-Cliente.hasMany(Pedido, { foreignKey: "clienteId" });
 Pedido.belongsTo(Cliente, { foreignKey: "clienteId" });
 
 Restaurante.hasMany(Pedido, { foreignKey: "restauranteId" });
