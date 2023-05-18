@@ -98,10 +98,10 @@ router.get("/comidas/:id", async (req, res) => {
   }
 });
 
-// ROTA PARA LISTAR UMA COMIDA POR ID de restaurante
+// ROTA PARA LISTAR TODAS COMIDAS DE UM RESTAURANTE
 router.get("/comidas/restaurante/:id", async (req, res) => {
   try {
-    const comida = await Comida.findOne({
+    const comida = await Comida.findAll({
       where: { restauranteId: req.params.id },
     });
     if (comida) {
