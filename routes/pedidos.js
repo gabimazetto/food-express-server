@@ -173,7 +173,9 @@ router.get("/pedidos/restaurante/:restauranteId", async (req, res) => {
           },
           {
             model: Cliente,
-            include: Endereco,
+          },
+          {
+            model: EnderecoPedido,
           },
           {
             model: Restaurante,
