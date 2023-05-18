@@ -31,7 +31,7 @@ const validacaoPedido = Joi.object({
     bairro: Joi.string().required(),
     numero: Joi.string().required(),
     cep: Joi.string().max(9).required(),
-    complemento: Joi.string(),
+    complemento: Joi.string().allow(""),
   },
 });
 

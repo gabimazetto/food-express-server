@@ -14,7 +14,7 @@ const validacaoCliente = Joi.object({
     cep: Joi.string().max(9).required(),
     rua: Joi.string().required(),
     numero: Joi.string().required(),
-    complemento: Joi.string(),
+    complemento: Joi.string().allow(""),
   },
 });
 
