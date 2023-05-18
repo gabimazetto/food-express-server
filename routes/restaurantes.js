@@ -231,20 +231,19 @@ router.get("/restaurante/:nome", async (req, res) => {
 
 //ROTA PARA LISTAR TODAS COMIDAS DO RESTAURANTE
 router.get("/restaurantes/:id/cardapio/", async (req, res) => {
-  try {
-    const restaurante = await Restaurante.findOne({
-      where: { id: req.params.id },
-      include: [Comida],
-    });
-    if (restaurante) {
-      res.status(201).json(restaurante);
-    } else {
-      res.status(404).json({ message: "Restaurante não encontrado." });
+    try {
+        const restaurante = await Comida.findAll({
+            where: { restauranteId: req.params.id },
+        });
+        if (restaurante) {
+            res.status(201).json(restaurante);
+        } else {
+            res.status(404).json({ message: "Restaurante não encontrado." });
+        };
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Um erro aconteceu." });
     }
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Um erro aconteceu." });
-  }
 });
 
 //ROTA PARA ATUALIZAR UM RESTAURANTE - PUT
