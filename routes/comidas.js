@@ -137,7 +137,7 @@ router.put("/comidas/:id", upload.single("imagem"), async (req, res) => {
     }
 
     if (codigo && nome && descricao && categoria && preco && peso) {
-      const imagemURL = comida.imagem;
+      let imagemURL = comida.imagem;
       if (req.file) {
         imagemURL = await uploadImagemComida(req.file);
       }
