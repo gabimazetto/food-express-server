@@ -23,14 +23,15 @@ const Pedido = connection.define("pedido", {
     validate: {
       isIn: [["Cartão de crédito", "Cartão de débito", "Dinheiro", "PIX", "VR", "VA", "Carteira Digital"]]
     },
-  }
+  }  
 }, { paranoid: true });
 
 
-Item.hasMany(Pedido, { foreignKey: "itemId" });
-Pedido.belongsTo(Item, { foreignKey: "itemId" });
+Pedido.hasMany(Item, { foreignKey: "pedidoId" });
+Item.belongsTo(Pedido, { foreignKey: "pedidoId" });
 
 Pedido.belongsTo(Cliente, { foreignKey: "clienteId" });
+Cliente.hasOne(Pedido, { foreignKey: "clienteId" });
 
 Restaurante.hasMany(Pedido, { foreignKey: "restauranteId" });
 Pedido.belongsTo(Restaurante, { foreignKey: "restauranteId" });
