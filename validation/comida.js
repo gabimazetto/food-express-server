@@ -48,7 +48,7 @@ const validacaoComidaAtt = Joi.object({
   ),
   preco: Joi.string().required(),
   peso: Joi.number().required(),
-  imagem: Joi.string(),
+  imagem: Joi.optional(),
 });
 
 module.exports = { validacaoComida, validacaoComidaAtt };
