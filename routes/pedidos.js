@@ -18,14 +18,12 @@ router.post("/pedidos", async (req, res) => {
     status,
     clienteId,
     restauranteId,
-    itemId,
     metodoPagamento,
     enderecoPedido,
   } = req.body;
   try {
     const cliente = await Cliente.findByPk(clienteId);
     const restaurante = await Restaurante.findByPk(restauranteId);
-    const item = await Item.findByPk(itemId);
     const { error, value } = validacaoPedido.validateAsync(req.body, {
       abortEarly: false,
     });
@@ -33,14 +31,13 @@ router.post("/pedidos", async (req, res) => {
       return res
         .status(400)
         .json({ msg: " Erro na validação do Joi" }, { err: error.message });
-    } else if (cliente && restaurante && item) {
+    } else if (cliente && restaurante) {
       const pedido = await Pedido.create(
         {
           dataRegistro,
           status,
           clienteId,
           restauranteId,
-          itemId,
           metodoPagamento,
           enderecoPedido,
         },
@@ -195,6 +192,27 @@ router.get("/pedidos/restaurante/:restauranteId", async (req, res) => {
     res.status(500).json({ message: "Um erro aconteceu." });
   }
 });
+
+//ROTA PARA LISTAR PEDIDOS PELO CLIENTE E RESTAURANTE QUE ESTEJA PENDENTE
+router.get("/pedidos/:restauranteId/:clienteId", async (req, res) => {
+  const { restauranteId, clienteId } = req.params;
+  try {
+    const pedidos = await Pedido.findAll({
+      where: {
+        restauranteId: restauranteId,
+        clienteId: clienteId,
+        status: "Pendente"
+      },
+      include: {
+        model: Item
+      }
+    })
+    res.status(200).json(pedidos);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Um erro aconteceu." });
+  }
+})
 
 // ROTA PARA ATUALIZAR UM PEDIDO - PUT
 router.put("/pedidos/:id", async (req, res) => {

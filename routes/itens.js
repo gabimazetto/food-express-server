@@ -3,11 +3,13 @@ const router = express.Router();
 const Item = require("../database/item");
 const { Comida } = require("../database/comida");
 const validacaoItem = require("../validation/item");
+const Pedido = require("../database/pedido");
+const Restaurante = require("../database/restaurante");
 
 // ROTA PARA ADICIONAR UM ITEM - POST
 router.post("/itens", async (req, res) => {
   //Puxando dados do req.body
-  const { quantidade, comidaId } = req.body;
+  const { quantidade, comidaId, pedidoId } = req.body;
   try {
     const { error, value } = validacaoItem.validate(req.body, {abortEarly: false});
     if (error) {
@@ -19,9 +21,10 @@ router.post("/itens", async (req, res) => {
     else if (quantidade && quantidade > 0 && comidaId && comidaId > 0) {
       // Verifica se existe uma comida com esse id cadastrada no banco de dados
       const comida = await Comida.findByPk(comidaId);
+      const pedido = await Pedido.findByPk(pedidoId);
       // Se existir, cria um novo item
-      if (comida) {
-        const novoItem = await Item.create({ quantidade, comidaId });
+      if (comida && pedido) {
+        const novoItem = await Item.create({ quantidade, comidaId, pedidoId });
         res.status(201).json(novoItem);
       } else {
         res.status(404).json({ message: "Comida não encontrada" });
@@ -42,9 +45,35 @@ router.get("/itens", async (req, res) => {
   res.json(listaItens);
 });
 
+//ROTA PARA LISTAR PEDIDOS DE CLIENTEID E RESTAURANTEID QUE ESTEJA PENDENTE
+router.get("/itens/:restauranteId/:clienteId", async (req, res) => {
+  const { restauranteId, clienteId } = req.params;
+
+  try {
+    const itens = await Item.findAll({
+      include: [
+        {
+          model: Pedido,
+          where: {
+            restauranteId: restauranteId,
+            clienteId: clienteId,
+            status: "Pendente"
+          }
+        }
+      ]
+    });
+
+    res.status(200).json(itens);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Um erro aconteceu." });
+  }
+});
+
+
 // ROTA PARA ATUALIZAR UM ITEM - PUT
 router.put("/itens/:id", async (req, res) => {
-  const { quantidade, comidaId } = req.body;
+  const { quantidade, comidaId, pedidoId } = req.body;
   const { id } = req.params;
   try {
     const item = await Item.findByPk(id);
@@ -56,7 +85,7 @@ router.put("/itens/:id", async (req, res) => {
         .status(400)
         .json({ msg: " Erro na validação do Joi" }, { err: error.message });
     } else if (item) {
-      await item.update({ quantidade, comidaId });
+      await item.update({ quantidade, comidaId, pedidoId });
       res.status(200).json({ message: "Item atualizado." });
     } else {
       res.status(404).json({ message: "Item não encontrado." });
