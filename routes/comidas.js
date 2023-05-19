@@ -149,7 +149,7 @@ router.put("/comidas/:id", upload.single("imagem"), async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Um erro aconteceu." });
+    res.status(500).json({ message: err.messages });
   }
 });
 
