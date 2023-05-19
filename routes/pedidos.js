@@ -26,9 +26,13 @@ router.post("/pedidos", async (req, res) => {
     const cliente = await Cliente.findByPk(clienteId);
     const restaurante = await Restaurante.findByPk(restauranteId);
     const item = await Item.findByPk(itemId);
-    const { error, value } = validacaoPedido.validateAsync(req.body);
+    const { error, value } = validacaoPedido.validateAsync(req.body, {
+      abortEarly: false,
+    });
     if (error) {
-      return res.status(520).json({ msg: " Erro na validação do Joi" });
+      return res
+        .status(400)
+        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
     } else if (cliente && restaurante && item) {
       const pedido = await Pedido.create(
         {
@@ -198,9 +202,13 @@ router.put("/pedidos/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const pedido = await Pedido.findByPk(id);
-    const { error, value } = validacaoPedidoAtt.validate(req.body);
+    const { error, value } = validacaoPedidoAtt.validate(req.body, {
+      abortEarly: false,
+    });
     if (error) {
-      return res.status(520).json({ msg: " Erro na validação do Joi" });
+      return res
+        .status(400)
+        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
     } else if (pedido) {
       await pedido.update({ status });
       res.status(200).json({ message: "Pedido atualizado." });

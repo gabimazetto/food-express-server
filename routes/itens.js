@@ -9,9 +9,11 @@ router.post("/itens", async (req, res) => {
   //Puxando dados do req.body
   const { quantidade, comidaId } = req.body;
   try {
-    const { error, value } = validacaoItem.validate(req.body);
+    const { error, value } = validacaoItem.validate(req.body, {abortEarly: false});
     if (error) {
-      return res.status(520).json({ msg: " Erro na validação do Joi" });
+      return res
+        .status(400)
+        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
     }
     // Verifica se a quantidade e a comida existe e se são maiores que 0
     else if (quantidade && quantidade > 0 && comidaId && comidaId > 0) {
@@ -46,9 +48,13 @@ router.put("/itens/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const item = await Item.findByPk(id);
-    const { error, value } = validacaoItem.validate(req.body);
+    const { error, value } = validacaoItem.validate(req.body, {
+      abortEarly: false,
+    });
     if (error) {
-      return res.status(520).json({ msg: " Erro na validação do Joi" });
+      return res
+        .status(400)
+        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
     } else if (item) {
       await item.update({ quantidade, comidaId });
       res.status(200).json({ message: "Item atualizado." });

@@ -29,9 +29,13 @@ router.post("/clientes", async (req, res) => {
   try {
     const salt = await bcrypt.genSalt(12);
     const senhaHash = await bcrypt.hash(senha, salt);
-    const { error, value } = validacaoCliente.validateAsync(req.body);
+    const { error, value } = validacaoCliente.validateAsync(req.body, {
+      abortEarly: false,
+    });
     if (error) {
-      return res.status(520).json({ msg: " Erro na validação do Joi" });
+      return res
+        .status(400)
+        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
     } else if (senha != confirmarSenha) {
       return res
         .status(422)
@@ -207,10 +211,14 @@ router.put("/clientes/:id", async (req, res) => {
     req.body;
   const { id } = req.params;
   try {
-    const { error, value } = validacaoJoi.validate(req.body);
     const atualizarCliente = await Cliente.findByPk(id);
+    const { error, value } = validacaoJoi.validate(req.body, {
+      abortEarly: false,
+    });
     if (error) {
-      return res.status(520).json({ msg: " Erro na validação do Joi" });
+      return res
+        .status(400)
+        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
     } else if (atualizarCliente) {
       if (endereco) {
         await Endereco.update(endereco, { where: { clienteId: id } });

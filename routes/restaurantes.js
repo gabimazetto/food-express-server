@@ -25,9 +25,13 @@ router.post("/restaurantes", async (req, res) => {
   try {
     const salt = await bcrypt.genSalt(12);
     const senhaHash = await bcrypt.hash(senha, salt);
-    const { error, value } = validacaoRestaurante.validate(req.body);
+    const { error, value } = validacaoRestaurante.validate(req.body, {
+      abortEarly: false,
+    });
     if (error) {
-      return res.status(520).json({ msg: " Erro na validação do Joi" });
+      return res
+        .status(400)
+        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
     } else if (senha != confirmarSenha) {
       return res
         .status(422)
@@ -231,19 +235,19 @@ router.get("/restaurante/:nome", async (req, res) => {
 
 //ROTA PARA LISTAR TODAS COMIDAS DO RESTAURANTE
 router.get("/restaurantes/:id/cardapio/", async (req, res) => {
-    try {
-        const restaurante = await Comida.findAll({
-            where: { restauranteId: req.params.id },
-        });
-        if (restaurante) {
-            res.status(201).json(restaurante);
-        } else {
-            res.status(404).json({ message: "Restaurante não encontrado." });
-        };
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: "Um erro aconteceu." });
+  try {
+    const restaurante = await Comida.findAll({
+      where: { restauranteId: req.params.id },
+    });
+    if (restaurante) {
+      res.status(201).json(restaurante);
+    } else {
+      res.status(404).json({ message: "Restaurante não encontrado." });
     }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Um erro aconteceu." });
+  }
 });
 
 //ROTA PARA ATUALIZAR UM RESTAURANTE - PUT
@@ -253,9 +257,13 @@ router.put("/restaurantes/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const restauranteAtt = await Restaurante.findByPk(id);
-    const { error, value } = validacaoRestaurante.validate(req.body);
+    const { error, value } = validacaoRestaurante.validate(req.body, {
+      abortEarly: false,
+    });
     if (error) {
-      return res.status(520).json({ msg: " Erro na validação do Joi" });
+      return res
+        .status(400)
+        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
     } else if (restauranteAtt) {
       if (endereco) {
         await Endereco.update(endereco, { where: { restauranteId: id } });

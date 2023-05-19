@@ -2,34 +2,43 @@ const Joi = require("joi");
 
 const validacaoComida = Joi.object({
   codigo: Joi.string().required(), //unique,
-  nome: Joi.string().max(130),
+  nome: Joi.string().max(130).required(),
   descricao: Joi.string().required(),
-  categoria: Joi.string().valid(
-    "Açaí",
-    "Lanche",
-    "Pizza",
-    "Brasileira",
-    "Italiana",
-    "Sobremesa",
-    "Japonesa",
-    "Chinesa",
-    "Vegetariana",
-    "Padaria",
-    "Marmita",
-    "Carne",
-    "Fit",
-    "Árabe"
-  ),
+  categoria: Joi.string()
+    .valid(
+      "Açaí",
+      "Lanche",
+      "Pizza",
+      "Brasileira",
+      "Italiana",
+      "Sobremesa",
+      "Japonesa",
+      "Chinesa",
+      "Vegetariana",
+      "Padaria",
+      "Marmita",
+      "Carne",
+      "Fit",
+      "Árabe"
+    )
+    .required(),
   preco: Joi.string().required(),
   peso: Joi.number().required(),
-  imagem: Joi.optional(),
+  imagem: Joi.object({
+    fieldname: Joi.string().valid("image").required(),
+    originalname: Joi.string().required(),
+    encoding: Joi.string().required(),
+    mimetype: Joi.string().valid("image/jpeg", "image/png").required(),
+    buffer: Joi.binary().required(),
+    size: Joi.number().required(),
+  }),
   restauranteId: Joi.number().required(),
 });
 
 const validacaoComidaAtt = Joi.object({
-  codigo: Joi.string().required(), //unique,
+  codigo: Joi.string(), //unique,
   nome: Joi.string().max(130),
-  descricao: Joi.string().required(),
+  descricao: Joi.string(),
   categoria: Joi.string().valid(
     "Açaí",
     "Lanche",
@@ -46,9 +55,16 @@ const validacaoComidaAtt = Joi.object({
     "Fit",
     "Árabe"
   ),
-  preco: Joi.string().required(),
-  peso: Joi.number().required(),
-  imagem: Joi.optional(),
+  preco: Joi.string(),
+  peso: Joi.number(),
+  imagem: Joi.object({
+    fieldname: Joi.string().valid("image").required(),
+    originalname: Joi.string().required(),
+    encoding: Joi.string().required(),
+    mimetype: Joi.string().valid("image/jpeg", "image/png").required(),
+    buffer: Joi.binary().required(),
+    size: Joi.number().required(),
+  }),
 });
 
 module.exports = { validacaoComida, validacaoComidaAtt };
