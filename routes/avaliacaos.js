@@ -16,9 +16,13 @@ router.post("/avaliacaos", async (req, res) => {
     const cliente = await Cliente.findByPk(clienteId);
     const restaurante = await Restaurante.findByPk(restauranteId);
     const pedido = await Pedido.findByPk(pedidoId);
-    const { error, value } = validacaoAvaliacao.validate(req.body);
+    const { error, value } = validacaoAvaliacao.validate(req.body, {
+      abortEarly: false,
+    });
     if (error) {
-      return res.status(520).json({ msg: " Erro na validação do Joi" });
+      return res
+        .status(400)
+        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
     } else if (
       pedido &&
       pedido.status === "Entregue" &&
@@ -78,9 +82,13 @@ router.put("/avaliacaos/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const avaliar = await Avaliacao.findByPk(id);
-    const { error, value } = validacaoRestaurante.validate(req.body);
+    const { error, value } = validacaoRestaurante.validate(req.body, {
+      abortEarly: false,
+    });
     if (error) {
-      return res.status(520).json({ msg: " Erro na validação do Joi" });
+      return res
+        .status(400)
+        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
     } else if (avaliar) {
       await avaliar.update({ avaliacao, comentario });
       res.status(200).json({ message: "Sua avaliação foi atualizada." });

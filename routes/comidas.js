@@ -15,9 +15,13 @@ router.post("/comidas", upload.single("imagem"), async (req, res) => {
   const { codigo, nome, descricao, categoria, preco, peso, restauranteId } =
     req.body;
   try {
-    const { error, value } = validacaoComida.validate(req.body);
+    const { error, value } = validacaoComida.validate(req.body, {
+      abortEarly: false,
+    });
     if (error) {
-      return res.status(520).json({ msg: " Erro na validação do Joi" });
+      return res
+        .status(400)
+        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
     } else if (
       codigo &&
       nome &&
@@ -120,9 +124,13 @@ router.put("/comidas/:id", upload.single("imagem"), async (req, res) => {
   const { codigo, nome, descricao, categoria, preco, peso } = req.body;
   try {
     const comida = await Comida.findByPk(req.params.id);
-    const { error, value } = validacaoComidaAtt.validate(req.body);
+    const { error, value } = validacaoComidaAtt.validate(req.body, {
+      abortEarly: false,
+    });
     if (error) {
-      return res.status(520).json({ msg: " Erro na validação do Joi" });
+      return res
+        .status(400)
+        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
     } else if (!comida) {
       res.status(404).json({ message: "Comida não encontrada." });
       return;
