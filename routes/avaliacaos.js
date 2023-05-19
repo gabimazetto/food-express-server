@@ -59,6 +59,18 @@ router.get("/avaliacaos/:restauranteId", async (req, res) => {
   }
 });
 
+router.get("/avaliacaos/cliente/:clienteId", async (req, res) => {
+  try {
+    const avaliacoes = await Avaliacao.findAll({
+      where: { clienteId: req.params.clienteId },
+    });
+    res.json(avaliacoes);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Um erro aconteceu" });
+  }
+});
+
 // ROTA PARA REMOVER UMA AVALIAÇÃO - DELETE
 router.delete("/avaliacaos/:id", async (req, res) => {
   const { id } = req.params;
