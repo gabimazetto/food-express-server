@@ -14,9 +14,7 @@ const validacaoPedido = Joi.object({
     ),
   clienteId: Joi.number().required(),
   restauranteId: Joi.number().required(),
-  itemId: Joi.number().required(),
   metodoPagamento: Joi.string()
-    .required()
     .valid(
       "Cartão de crédito",
       "Cartão de débito",
