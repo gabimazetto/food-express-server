@@ -46,11 +46,16 @@ router.post("/avaliacaos", async (req, res) => {
   }
 });
 
+
 // ROTA PARA LISTAR AVALIAÇÕES POR ID DE RESTAURANTE - GET
 router.get("/avaliacaos/:restauranteId", async (req, res) => {
   try {
     const avaliacoes = await Avaliacao.findAll({
       where: { restauranteId: req.params.restauranteId },
+      include: {
+        model: Cliente,
+        attributes: ["nome"],
+      },
     });
     res.json(avaliacoes);
   } catch (err) {
@@ -59,6 +64,8 @@ router.get("/avaliacaos/:restauranteId", async (req, res) => {
   }
 });
 
+
+// ROTA PARA LISTAR AVALIAÇÕES POR ID DE CLIENTE - GET
 router.get("/avaliacaos/cliente/:clienteId", async (req, res) => {
   try {
     const avaliacoes = await Avaliacao.findAll({
@@ -110,6 +117,29 @@ router.put("/avaliacaos/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json("Ocorreu um erro.");
     console.log(err);
+  }
+});
+
+// ROTA PARA CALCULAR A MÉDIA DAS AVALIAÇÕES POR RESTAURANTE - GET
+router.get("/avaliacaos/media/:restauranteId", async (req, res) => {
+  const { restauranteId } = req.params;
+  try {
+    const avaliacoes = await Avaliacao.findAll({
+      where: { restauranteId },
+    });
+    const totalAvaliacoes = avaliacoes.length;
+    if (totalAvaliacoes === 0) {
+      return res.status(200).json({ media: 0 });
+    }
+    let somaAvaliacoes = 0;
+    for (const avaliacao of avaliacoes) {
+      somaAvaliacoes += parseInt(avaliacao.avaliacao);
+    }
+    const media = somaAvaliacoes / totalAvaliacoes;
+    res.status(200).json({ media });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Um erro aconteceu" });
   }
 });
 
