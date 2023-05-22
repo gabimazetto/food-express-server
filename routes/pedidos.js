@@ -2,17 +2,19 @@ const Item = require("../database/item");
 const Cliente = require("../database/cliente");
 const Restaurante = require("../database/restaurante");
 const Pedido = require("../database/pedido");
-
 const { Router } = require("express");
 const { Comida } = require("../database/comida");
 const Endereco = require("../database/endereco");
 const { validacaoPedido, validacaoPedidoAtt } = require("../validation/pedido");
 const EnderecoPedido = require("../database/enderecoPedido");
+const checkTokenRestaurante = require("../validation/tokenRestaurante");
+const checkTokenValido = require("../validation/tokenRestaurante");
+const checkTokenCliente = require("../validation/tokenCliente");
 
 const router = Router();
 
 // ROTA PARA ADICIONAR UM PEDIDO - POST
-router.post("/pedidos", async (req, res) => {
+router.post("/pedidos", checkTokenCliente, async (req, res) => {
   const {
     dataRegistro,
     status,
@@ -54,7 +56,7 @@ router.post("/pedidos", async (req, res) => {
 });
 
 // ROTA PARA LISTAR PEDIDOS ORDENADOS POR DATA - GET
-router.get("/pedidos", async (req, res) => {
+router.get("/pedidos", checkTokenValido, async (req, res) => {
   try {
     const pedidos = await Pedido.findAll({
       include: [
@@ -89,7 +91,7 @@ router.get("/pedidos", async (req, res) => {
 });
 
 // ROTA PARA LISTAR PEDIDOS EFETUADOS PELO CLIENTE
-router.get("/pedidos/cliente/:clienteId", async (req, res) => {
+router.get("/pedidos/cliente/:clienteId", checkTokenCliente, async (req, res) => {
   const { clienteId } = req.params;
   try {
     const pedidos = await Pedido.findAll({
@@ -126,7 +128,7 @@ router.get("/pedidos/cliente/:clienteId", async (req, res) => {
 });
 
 // ROTA PARA LISTAR PEDIDOS RECEBIDOS PELO RESTAURANTE
-router.get("/pedidos/restaurante/:restauranteId", async (req, res) => {
+router.get("/pedidos/restaurante/:restauranteId", checkTokenRestaurante, async (req, res) => {
   const { restauranteId } = req.params;
   const { status } = req.query;
   try {
@@ -194,7 +196,7 @@ router.get("/pedidos/restaurante/:restauranteId", async (req, res) => {
 });
 
 //ROTA PARA LISTAR PEDIDOS PELO CLIENTE E RESTAURANTE QUE ESTEJA PENDENTE
-router.get("/pedidos/:restauranteId/:clienteId", async (req, res) => {
+router.get("/pedidos/:restauranteId/:clienteId", checkTokenValido, async (req, res) => {
   const { restauranteId, clienteId } = req.params;
   try {
     const pedidos = await Pedido.findAll({
@@ -215,7 +217,7 @@ router.get("/pedidos/:restauranteId/:clienteId", async (req, res) => {
 })
 
 // ROTA PARA ATUALIZAR UM PEDIDO - PUT
-router.put("/pedidos/:id", async (req, res) => {
+router.put("/pedidos/:id", checkTokenRestaurante, async (req, res) => {
   const { status } = req.body;
   const { id } = req.params;
   try {
@@ -239,7 +241,7 @@ router.put("/pedidos/:id", async (req, res) => {
 });
 
 // ROTA PARA A REMOÇÃO DE UM PEDIDO - DELETE
-router.delete("/pedidos/:id", async (req, res) => {
+router.delete("/pedidos/:id", checkTokenCliente, async (req, res) => {
   const { id } = req.params;
   const pedido = await Pedido.findOne({ where: { id } });
   try {
@@ -256,7 +258,7 @@ router.delete("/pedidos/:id", async (req, res) => {
 });
 
 //ROTA PARA LISTAR PEDIDO DE DETERMINADO CLIENTE
-router.get("/pedidos/cliente/:clienteId/:pedidoId", async (req, res) => {
+router.get("/pedidos/cliente/:clienteId/:pedidoId", checkTokenCliente, async (req, res) => {
   const { clienteId, pedidoId } = req.params;
   try {
     const pedido = await Pedido.findOne({

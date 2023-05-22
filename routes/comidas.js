@@ -1,17 +1,18 @@
 const { Op } = require("sequelize");
 const { Router } = require("express");
 const { Comida, uploadImagemComida } = require("../database/comida");
-
 // Importar o Multer para gerenciar o upload dos arquivos do form.
 const multer = require("multer");
 const { validacaoComida, validacaoComidaAtt } = require("../validation/comida");
 const upload = multer();
+const checkTokenRestaurante = require("../validation/tokenRestaurante");
+const checkTokenValido = require("../validation/tokenRestaurante");
 
 const router = Router();
 
 // ROTA PARA CADASTRAR UMA COMIDA
 // Logo após a rota, é necessário passar o upload.single("nomeDoCampoQueRecebeArquivo").
-router.post("/comidas", upload.single("imagem"), async (req, res) => {
+router.post("/comidas", checkTokenRestaurante, upload.single("imagem"), async (req, res) => {
   const { codigo, nome, descricao, categoria, preco, peso, restauranteId } =
     req.body;
   try {
@@ -66,7 +67,7 @@ router.post("/comidas", upload.single("imagem"), async (req, res) => {
 // });
 
 // ROTA PARA LISTAR COMIDAS FILTRADAS POR CATEGORIA, NOME E DESCRIÇÃO
-router.get("/comidas", async (req, res) => {
+router.get("/comidas", checkTokenValido, async (req, res) => {
   const categoria = req.query.categoria;
   const nome = req.query.nome;
   const descricao = req.query.descricao;
@@ -86,7 +87,7 @@ router.get("/comidas", async (req, res) => {
 });
 
 // ROTA PARA LISTAR UMA COMIDA POR ID
-router.get("/comidas/:id", async (req, res) => {
+router.get("/comidas/:id", checkTokenValido, async (req, res) => {
   try {
     const comida = await Comida.findOne({
       where: { id: req.params.id },
@@ -103,7 +104,7 @@ router.get("/comidas/:id", async (req, res) => {
 });
 
 // ROTA PARA LISTAR TODAS COMIDAS DE UM RESTAURANTE
-router.get("/comidas/restaurante/:id", async (req, res) => {
+router.get("/comidas/restaurante/:id", checkTokenValido, async (req, res) => {
   try {
     const comida = await Comida.findAll({
       where: { restauranteId: req.params.id },
@@ -120,7 +121,7 @@ router.get("/comidas/restaurante/:id", async (req, res) => {
 });
 
 // ROTA PARA EDITAR COMIDA
-router.put("/comidas/:id", upload.single("imagem"), async (req, res) => {
+router.put("/comidas/:id", checkTokenRestaurante, upload.single("imagem"), async (req, res) => {
   const { codigo, nome, descricao, categoria, preco, peso } = req.body;
   try {
     const comida = await Comida.findByPk(req.params.id);
@@ -162,7 +163,7 @@ router.put("/comidas/:id", upload.single("imagem"), async (req, res) => {
 });
 
 // ROTA DELETE PARA COMIDA
-router.delete("/comidas/:id", async (req, res) => {
+router.delete("/comidas/:id", checkTokenRestaurante, async (req, res) => {
   const { id } = req.params;
   const comida = await Comida.findOne({ where: { id } });
   try {

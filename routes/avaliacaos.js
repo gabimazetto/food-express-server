@@ -4,11 +4,13 @@ const Restaurante = require("../database/restaurante");
 const Pedido = require("../database/pedido");
 const Cliente = require("../database/cliente");
 const validacaoAvaliacao = require("../validation/avaliacao");
+const checkTokenValido = require("../validation/tokenRestaurante");
+const checkTokenCliente = require("../validation/tokenCliente");
 
 const router = Router();
 
 // ROTA PARA ADICIONAR AVALIACAO - POST
-router.post("/avaliacaos", async (req, res) => {
+router.post("/avaliacaos", checkTokenCliente, async (req, res) => {
   const { avaliacao, comentario, clienteId, restauranteId, pedidoId } =
     req.body;
 
@@ -48,7 +50,7 @@ router.post("/avaliacaos", async (req, res) => {
 
 
 // ROTA PARA LISTAR AVALIAÇÕES POR ID DE RESTAURANTE - GET
-router.get("/avaliacaos/:restauranteId", async (req, res) => {
+router.get("/avaliacaos/:restauranteId", checkTokenValido, async (req, res) => {
   try {
     const avaliacoes = await Avaliacao.findAll({
       where: { restauranteId: req.params.restauranteId },
@@ -66,7 +68,7 @@ router.get("/avaliacaos/:restauranteId", async (req, res) => {
 
 
 // ROTA PARA LISTAR AVALIAÇÕES POR ID DE CLIENTE - GET
-router.get("/avaliacaos/cliente/:clienteId", async (req, res) => {
+router.get("/avaliacaos/cliente/:clienteId", checkTokenCliente, async (req, res) => {
   try {
     const avaliacoes = await Avaliacao.findAll({
       where: { clienteId: req.params.clienteId },
@@ -79,7 +81,7 @@ router.get("/avaliacaos/cliente/:clienteId", async (req, res) => {
 });
 
 // ROTA PARA REMOVER UMA AVALIAÇÃO - DELETE
-router.delete("/avaliacaos/:id", async (req, res) => {
+router.delete("/avaliacaos/:id", checkTokenCliente, async (req, res) => {
   const { id } = req.params;
   const avaliacao = await Avaliacao.findOne({ where: { id } });
   try {
@@ -96,7 +98,7 @@ router.delete("/avaliacaos/:id", async (req, res) => {
 });
 
 //Editar uma avaliação por ID
-router.put("/avaliacaos/:id", async (req, res) => {
+router.put("/avaliacaos/:id", checkTokenCliente, async (req, res) => {
   const { avaliacao, comentario } = req.body;
   const { id } = req.params;
   try {

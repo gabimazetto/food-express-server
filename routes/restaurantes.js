@@ -6,6 +6,9 @@ const { Comida } = require("../database/comida");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const validacaoRestaurante = require("../validation/restaurante");
+const checkTokenRestaurante = require("../validation/tokenRestaurante");
+const checkTokenValido = require("../validation/tokenRestaurante");
+const checkTokenCliente = require("../validation/tokenCliente");
 
 const router = Router();
 
@@ -96,47 +99,8 @@ router.post("/restaurantes/login", async (req, res) => {
   }
 });
 
-//FUNÇÃO DE AUTENTICAÇÃO DO TOKEN;
-function checkTokenRestaurante(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (!token) return res.status(401).json({ msg: "Acesso negado!" });
-  try {
-    const secret = process.env.SECRET;
-    const decodedToken = jwt.verify(token, secret);
-    if (decodedToken.role !== "restaurante") {
-      return res.status(403).json({ msg: "Acesso negado!" });
-    }
-    next();
-  } catch (err) {
-    res.status(400).json({ msg: "O Token é inválido!" });
-  }
-}
-
-//FUNÇÃO DE AUTENTICAÇÃO DO TOKEN QUE DEVOLVE O PAYLOAD;
-function checkTokenRestauranteDecoded(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (!token) return res.status(401).json({ msg: "Acesso negado!" });
-  try {
-    const secret = process.env.SECRET;
-    const decodedToken = jwt.verify(token, secret);
-    if (decodedToken.role !== "restaurante") {
-      return res.status(403).json({ msg: "Acesso negado!" });
-    } else if (decodedToken.role === "restaurante") {
-      req.decodedToken = decodedToken;
-      next();
-    }
-  } catch (err) {
-    res.status(400).json({ msg: "O Token é inválido!" });
-  }
-}
-
 //ACESSO A ROTA PRIVADA COM UTILIZAÇÃO DO TOKEN
-router.get(
-  "/restaurantes/home/:id",
-  checkTokenRestaurante,
-  async (req, res) => {
+router.get("/restaurantes/home/:id", checkTokenRestaurante, async (req, res) => {
     const { id } = req.params;
     // checar se o restaurante existe
     const restaurante = await Restaurante.findByPk(id);
@@ -147,12 +111,6 @@ router.get(
   }
 );
 
-//DEVOLVE OS DADOS DO PAYLOAD DECODIFICADO
-router.get("/restaurantes/home", checkTokenRestauranteDecoded, (req, res) => {
-  const decodedToken = req.decodedToken;
-  res.json(decodedToken);
-});
-
 //ROTA PUBLICA SEM NECESSIDADE DO TOKEN
 router.get("/", (req, res) => {
   res.status(200).json({ msg: "Bem vindo a API!" });
@@ -160,15 +118,15 @@ router.get("/", (req, res) => {
 
 //FIM JWT
 
-router.get("/restaurantes", async (req, res) => {
+router.get("/restaurantes", checkTokenValido, async (req, res) => {
   const listaRestaurantes = await Restaurante.findAll({
     include: [Endereco],
   });
   res.json(listaRestaurantes);
 });
 
-// ROTA PARA LISTAR UM RESTAURANTE POR ID - GE      T
-router.get("/restaurantes/:id", async (req, res) => {
+// ROTA PARA LISTAR UM RESTAURANTE POR ID - GET
+router.get("/restaurantes/:id", checkTokenValido, async (req, res) => {
   try {
     const restaurante = await Restaurante.findOne({
       where: { id: req.params.id },
@@ -186,7 +144,7 @@ router.get("/restaurantes/:id", async (req, res) => {
 });
 
 // ROTA PARA LISTAR RESTAURANTES POR NOME, CATEGORIA OU LOCALIZAÇÃO
-router.get("/restaurante/:nome", async (req, res) => {
+router.get("/restaurante/:nome", checkTokenCliente, async (req, res) => {
   try {
     const restaurantes = await Restaurante.findAll({
       where: {
@@ -234,24 +192,25 @@ router.get("/restaurante/:nome", async (req, res) => {
 });
 
 //ROTA PARA LISTAR TODAS COMIDAS DO RESTAURANTE
-router.get("/restaurantes/:id/cardapio/", async (req, res) => {
-  try {
-    const restaurante = await Comida.findAll({
-      where: { restauranteId: req.params.id },
-    });
-    if (restaurante) {
-      res.status(201).json(restaurante);
-    } else {
-      res.status(404).json({ message: "Restaurante não encontrado." });
+router.get("/restaurantes/:id/cardapio/", checkTokenRestaurante, async (req, res) => {
+    try {
+      const restaurante = await Comida.findAll({
+        where: { restauranteId: req.params.id },
+      });
+      if (restaurante) {
+        res.status(201).json(restaurante);
+      } else {
+        res.status(404).json({ message: "Restaurante não encontrado." });
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ message: "Um erro aconteceu." });
     }
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Um erro aconteceu." });
   }
-});
+);
 
 //ROTA PARA ATUALIZAR UM RESTAURANTE - PUT
-router.put("/restaurantes/:id", async (req, res) => {
+router.put("/restaurantes/:id", checkTokenRestaurante, async (req, res) => {
   const { nomeFantasia, razaoSocial, telefone, cnpj, email, senha, endereco } =
     req.body;
   const { id } = req.params;
@@ -288,7 +247,7 @@ router.put("/restaurantes/:id", async (req, res) => {
 });
 
 // DELETE -> Remover restaurante;
-router.delete("/restaurantes/:id", async (req, res) => {
+router.delete("/restaurantes/:id", checkTokenRestaurante, async (req, res) => {
   const { id } = req.params;
   try {
     const deletaRestaurante = await Restaurante.findByPk(id);

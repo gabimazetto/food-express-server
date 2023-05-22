@@ -1,13 +1,16 @@
 const express = require("express");
-const router = express.Router();
 const Item = require("../database/item");
 const { Comida } = require("../database/comida");
 const validacaoItem = require("../validation/item");
 const Pedido = require("../database/pedido");
 const Restaurante = require("../database/restaurante");
+const checkTokenValido = require("../validation/tokenRestaurante");
+const checkTokenCliente = require("../validation/tokenCliente");
+
+const router = express.Router();
 
 // ROTA PARA ADICIONAR UM ITEM - POST
-router.post("/itens", async (req, res) => {
+router.post("/itens", checkTokenCliente, async (req, res) => {
   //Puxando dados do req.body
   const { quantidade, comidaId, pedidoId } = req.body;
   try {
@@ -40,13 +43,13 @@ router.post("/itens", async (req, res) => {
 });
 
 // ROTA PARA LISTAR TODOS OS ITENS - GET
-router.get("/itens", async (req, res) => {
+router.get("/itens", checkTokenCliente, async (req, res) => {
   const listaItens = await Item.findAll();
   res.json(listaItens);
 });
 
 //ROTA PARA LISTAR PEDIDOS DE CLIENTEID E RESTAURANTEID QUE ESTEJA PENDENTE
-router.get("/itens/:restauranteId/:clienteId", async (req, res) => {
+router.get("/itens/:restauranteId/:clienteId", checkTokenValido, async (req, res) => {
   const { restauranteId, clienteId } = req.params;
 
   try {
@@ -72,7 +75,7 @@ router.get("/itens/:restauranteId/:clienteId", async (req, res) => {
 
 
 // ROTA PARA ATUALIZAR UM ITEM - PUT
-router.put("/itens/:id", async (req, res) => {
+router.put("/itens/:id", checkTokenCliente, async (req, res) => {
   const { quantidade, comidaId, pedidoId } = req.body;
   const { id } = req.params;
   try {
@@ -96,7 +99,7 @@ router.put("/itens/:id", async (req, res) => {
 });
 
 // ROTA PARA A REMOÇÃO DE UM ITEM - DELETE
-router.delete("/itens/:id", async (req, res) => {
+router.delete("/itens/:id", checkTokenCliente, async (req, res) => {
   const { id } = req.params;
   const item = await Item.findOne({ where: { id } });
   try {
