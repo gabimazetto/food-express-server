@@ -4,7 +4,7 @@ const { Comida } = require("../database/comida");
 const validacaoItem = require("../validation/item");
 const Pedido = require("../database/pedido");
 const Restaurante = require("../database/restaurante");
-const checkTokenValido = require("../validation/tokenRestaurante");
+const checkTokenValido = require("../validation/tokenValido");
 const checkTokenCliente = require("../validation/tokenCliente");
 
 const router = express.Router();

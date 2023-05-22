@@ -4,7 +4,7 @@ const Restaurante = require("../database/restaurante");
 const Pedido = require("../database/pedido");
 const Cliente = require("../database/cliente");
 const validacaoAvaliacao = require("../validation/avaliacao");
-const checkTokenValido = require("../validation/tokenRestaurante");
+const checkTokenValido = require("../validation/tokenValido");
 const checkTokenCliente = require("../validation/tokenCliente");
 
 const router = Router();

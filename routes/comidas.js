@@ -6,7 +6,7 @@ const multer = require("multer");
 const { validacaoComida, validacaoComidaAtt } = require("../validation/comida");
 const upload = multer();
 const checkTokenRestaurante = require("../validation/tokenRestaurante");
-const checkTokenValido = require("../validation/tokenRestaurante");
+const checkTokenValido = require("../validation/tokenValido");
 
 const router = Router();
 
