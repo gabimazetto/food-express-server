@@ -3,15 +3,14 @@ const Cliente = require("../database/cliente");
 const { Comida } = require("../database/comida");
 const Restaurante = require("../database/restaurante");
 const Favorito = require("../database/favorito");
-const router = Router();
 const { Op } = require("sequelize");
-const {
-  validacaoComidaFavorito,
-  validacaoRestauranteFavorito,
-} = require("../validation/favorito");
+const { validacaoComidaFavorito, validacaoRestauranteFavorito } = require("../validation/favorito");
+const checkTokenCliente = require("../validation/tokenCliente");
+
+const router = Router();
 
 // Adicionando Restaurante Favorito
-router.post("/restaurantes/favoritos", async (req, res) => {
+router.post("/restaurantes/favoritos", checkTokenCliente, async (req, res) => {
   const { favoritar, restauranteId, clienteId } = req.body;
   try {
     const cliente = await Cliente.findByPk(clienteId);
@@ -41,7 +40,7 @@ router.post("/restaurantes/favoritos", async (req, res) => {
 });
 
 // Adicionando Comida Favorita
-router.post("/comidas/favoritos", async (req, res) => {
+router.post("/comidas/favoritos", checkTokenCliente, async (req, res) => {
   const { favoritar, comidaId, clienteId } = req.body;
   try {
     const cliente = await Cliente.findByPk(clienteId);
@@ -71,7 +70,7 @@ router.post("/comidas/favoritos", async (req, res) => {
 });
 
 //Rota GET para listar todas as comidas salvas como favoritas
-router.get("/favoritos/comidas", async (req, res) => {
+router.get("/favoritos/comidas", checkTokenCliente, async (req, res) => {
   try {
     const favoritos = await Favorito.findAll({
       where: {
@@ -123,7 +122,7 @@ router.get("/favoritos/comidas", async (req, res) => {
 });
 
 //Rota GET para listar todas as comidas favoritas de um cliente especifico
-router.get("/favoritos/comidas/:clienteId", async (req, res) => {
+router.get("/favoritos/comidas/:clienteId", checkTokenCliente, async (req, res) => {
   const { clienteId } = req.params;
 
   try {
@@ -180,7 +179,7 @@ router.get("/favoritos/comidas/:clienteId", async (req, res) => {
 });
 
 // Rota GET para listar todos os restaurantes favoritos
-router.get("/favoritos/restaurantes", async (req, res) => {
+router.get("/favoritos/restaurantes", checkTokenCliente, async (req, res) => {
   try {
     const favoritos = await Favorito.findAll({
       where: {
@@ -221,7 +220,7 @@ router.get("/favoritos/restaurantes", async (req, res) => {
 });
 
 // Rota GET para listar dos restaurantes favoritos por um cliente especifico
-router.get("/favoritos/restaurantes/:clienteId", async (req, res) => {
+router.get("/favoritos/restaurantes/:clienteId", checkTokenCliente, async (req, res) => {
   const { clienteId } = req.params;
   try {
     const favoritos = await Favorito.findAll({
@@ -246,7 +245,7 @@ router.get("/favoritos/restaurantes/:clienteId", async (req, res) => {
 });
 
 // ROTA PARA REMOVER UMA COMIDA FAVORITA - DELETE
-router.delete("/favoritos/comidas/:id", async (req, res) => {
+router.delete("/favoritos/comidas/:id", checkTokenCliente, async (req, res) => {
   const { id } = req.params;
   const favorito = await Favorito.findOne({ where: { id } });
   try {
@@ -262,7 +261,7 @@ router.delete("/favoritos/comidas/:id", async (req, res) => {
   }
 });
 
-router.delete("/favoritos/restaurantes/:id", async (req, res) => {
+router.delete("/favoritos/restaurantes/:id", checkTokenCliente, async (req, res) => {
   const { id } = req.params;
   const favorito = await Favorito.findOne({ where: { id } });
   try {
