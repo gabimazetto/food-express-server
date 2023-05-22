@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const validacaoRestaurante = require("../validation/restaurante");
 const checkTokenRestaurante = require("../validation/tokenRestaurante");
-const checkTokenValido = require("../validation/tokenRestaurante");
+const checkTokenValido = require("../validation/tokenValido");
 const checkTokenCliente = require("../validation/tokenCliente");
 
 const router = Router();

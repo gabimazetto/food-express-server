@@ -8,7 +8,7 @@ const Endereco = require("../database/endereco");
 const { validacaoPedido, validacaoPedidoAtt } = require("../validation/pedido");
 const EnderecoPedido = require("../database/enderecoPedido");
 const checkTokenRestaurante = require("../validation/tokenRestaurante");
-const checkTokenValido = require("../validation/tokenRestaurante");
+const checkTokenValido = require("../validation/tokenValido");
 const checkTokenCliente = require("../validation/tokenCliente");
 
 const router = Router();
