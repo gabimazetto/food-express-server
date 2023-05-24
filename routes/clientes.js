@@ -142,7 +142,6 @@ router.get("/clientes/:id/pedidos", checkTokenCliente, async (req, res) => {
       where: { id: req.params.id }, // Filtra pelo "id" do cliente
       include: [Pedido],
     });
-
     res.json(pedidos);
   } catch (error) {
     console.error(error);
@@ -157,7 +156,6 @@ router.get("/clientes/:id/avaliacaos", checkTokenCliente, async (req, res) => {
       where: { id: req.params.id }, // Filtra pelo "id" do cliente
       include: [Avaliacao],
     });
-
     res.json(avaliacoes);
   } catch (error) {
     console.error(error);
@@ -167,10 +165,19 @@ router.get("/clientes/:id/avaliacaos", checkTokenCliente, async (req, res) => {
 
 // ROTA PARA ATUALIZAR UM CLIENTE - PUT
 router.put("/clientes/:id", checkTokenCliente, async (req, res) => {
-  const { nome, email, senha, telefone, cpf, dataNascimento, endereco } =
-    req.body;
+  const {
+    nome,
+    email,
+    senha,
+    telefone,
+    cpf,
+    dataNascimento,
+    endereco,
+  } = req.body;
   const { id } = req.params;
   try {
+    const salt = await bcrypt.genSalt(12);
+    const senhaHash = await bcrypt.hash(senha, salt);
     const atualizarCliente = await Cliente.findByPk(id);
     const { error, value } = validacaoCliente.validateAsync(req.body, {
       abortEarly: false,
@@ -186,7 +193,7 @@ router.put("/clientes/:id", checkTokenCliente, async (req, res) => {
       await atualizarCliente.update({
         nome,
         email,
-        senha,
+        senha: senhaHash,
         telefone,
         cpf,
         dataNascimento,
