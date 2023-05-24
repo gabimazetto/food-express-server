@@ -217,19 +217,22 @@ router.get("/pedidos/:restauranteId/:clienteId", checkTokenValido, async (req, r
 })
 
 // ROTA PARA ATUALIZAR UM PEDIDO - PUT
-router.put("/pedidos/:id", checkTokenRestaurante, async (req, res) => {
-  const { status } = req.body;
+router.put("/pedidos/:id", checkTokenValido, async (req, res) => {
+  const { status, metodoPagamento, enderecoPedido } = req.body;
   const { id } = req.params;
   try {
     const pedido = await Pedido.findByPk(id);
-    const { error, value } = validacaoPedidoAtt.validate(req.body, {
+    console.log(pedido);
+    const { error, value } = validacaoPedidoAtt.validateAsync(req.body, {
       abortEarly: false,
     });
+    console.log(req.body);
     if (error) {
-      return res
-        .status(400)
-        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
-    } else if (pedido) {
+      return res.status(400).json({ msg: " Erro na validação do Joi" }, { err: error.message });
+    } else if(pedido && metodoPagamento && enderecoPedido ) {
+      const pedidoAtualizado = await pedido.update({ metodoPagamento, enderecoPedido });
+      res.status(200).json(pedidoAtualizado);
+    } else if (pedido && status) {
       await pedido.update({ status });
       res.status(200).json({ message: "Pedido atualizado." });
     } else {

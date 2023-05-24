@@ -172,7 +172,7 @@ router.put("/clientes/:id", checkTokenCliente, async (req, res) => {
   const { id } = req.params;
   try {
     const atualizarCliente = await Cliente.findByPk(id);
-    const { error, value } = validacaoJoi.validate(req.body, {
+    const { error, value } = validacaoCliente.validateAsync(req.body, {
       abortEarly: false,
     });
     if (error) {
@@ -197,7 +197,7 @@ router.put("/clientes/:id", checkTokenCliente, async (req, res) => {
     }
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Um erro aconteceu." });
+    res.status(500).json(err, { message: "Um erro aconteceu." });
   }
 });
 

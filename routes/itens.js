@@ -14,7 +14,7 @@ router.post("/itens", checkTokenCliente, async (req, res) => {
   //Puxando dados do req.body
   const { quantidade, comidaId, pedidoId } = req.body;
   try {
-    const { error, value } = validacaoItem.validate(req.body, {abortEarly: false});
+    const { error, value } = validacaoItem.validateAsync(req.body, {abortEarly: false});
     if (error) {
       return res
         .status(400)
@@ -80,7 +80,7 @@ router.put("/itens/:id", checkTokenCliente, async (req, res) => {
   const { id } = req.params;
   try {
     const item = await Item.findByPk(id);
-    const { error, value } = validacaoItem.validate(req.body, {
+    const { error, value } = validacaoItem.validateAsync(req.body, {
       abortEarly: false,
     });
     if (error) {
