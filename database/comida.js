@@ -55,7 +55,6 @@ const Comida = connection.define(
         },
         imagem: {
             type: DataTypes.STRING,
-            
         },
     },
     { paranoid: true }

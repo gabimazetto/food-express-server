@@ -18,7 +18,7 @@ router.post("/avaliacaos", checkTokenCliente, async (req, res) => {
     const cliente = await Cliente.findByPk(clienteId);
     const restaurante = await Restaurante.findByPk(restauranteId);
     const pedido = await Pedido.findByPk(pedidoId);
-    const { error, value } = validacaoAvaliacao.validate(req.body, {
+    const { error, value } = validacaoAvaliacao.validateAsync(req.body, {
       abortEarly: false,
     });
     if (error) {
@@ -103,7 +103,7 @@ router.put("/avaliacaos/:id", checkTokenCliente, async (req, res) => {
   const { id } = req.params;
   try {
     const avaliar = await Avaliacao.findByPk(id);
-    const { error, value } = validacaoRestaurante.validate(req.body, {
+    const { error, value } = validacaoAvaliacao.validateAsync(req.body, {
       abortEarly: false,
     });
     if (error) {

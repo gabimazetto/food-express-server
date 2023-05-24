@@ -24,14 +24,7 @@ const validacaoComida = Joi.object({
     .required(),
   preco: Joi.string().required(),
   peso: Joi.number().required(),
-  imagem: Joi.object({
-    fieldname: Joi.string().valid("image").required(),
-    originalname: Joi.string().required(),
-    encoding: Joi.string().required(),
-    mimetype: Joi.string().valid("image/jpeg", "image/png").required(),
-    buffer: Joi.binary().required(),
-    size: Joi.number().required(),
-  }),
+  imagem: Joi.string().uri(),
   restauranteId: Joi.number().required(),
 });
 
@@ -57,14 +50,8 @@ const validacaoComidaAtt = Joi.object({
   ),
   preco: Joi.string(),
   peso: Joi.number(),
-  // imagem: Joi.object({
-  //   fieldname: Joi.string().valid("image").required(),
-  //   originalname: Joi.string().required(),
-  //   encoding: Joi.string().required(),
-  //   mimetype: Joi.string().valid("image/jpeg", "image/png").required(),
-  //   buffer: Joi.binary().required(),
-  //   size: Joi.number().required(),
-  // }),
+  imagem: Joi.string().uri(),
+  restauranteId: Joi.number().required()
 });
 
 module.exports = { validacaoComida, validacaoComidaAtt };

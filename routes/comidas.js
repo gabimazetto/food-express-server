@@ -12,48 +12,56 @@ const router = Router();
 
 // ROTA PARA CADASTRAR UMA COMIDA
 // Logo após a rota, é necessário passar o upload.single("nomeDoCampoQueRecebeArquivo").
-router.post("/comidas", checkTokenRestaurante, upload.single("imagem"), async (req, res) => {
-  const { codigo, nome, descricao, categoria, preco, peso, restauranteId } =
-    req.body;
-  try {
-    const { error, value } = validacaoComida.validate(req.body, {
-      abortEarly: false,
-    });
-    if (error) {
-      return res
-        .status(400)
-        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
-    } else if (
-      codigo &&
-      nome &&
-      descricao &&
-      categoria &&
-      preco &&
-      peso &&
-      restauranteId
-    ) {
-      const imagemURL = await uploadImagemComida(req.file);
-      const novaComida = await Comida.create({
-        codigo,
-        nome,
-        descricao,
-        categoria,
-        preco,
-        peso,
-        imagem: imagemURL,
-        restauranteId,
-      });
-      res.status(201).json(novaComida);
-    } else if (!restauranteId) {
-      res.status(404).json({ message: "Restaurante não encontrado." });
-    } else {
-      res.status(400).json({ message: "Requisição inválida." });
+router.post(
+  "/comidas",
+  checkTokenRestaurante,
+  upload.single("imagem"),
+  async (req, res) => {
+    const { codigo, nome, descricao, categoria, preco, peso, restauranteId } =
+      req.body;
+    try {
+      if (
+        codigo &&
+        nome &&
+        descricao &&
+        categoria &&
+        preco &&
+        peso &&
+        restauranteId
+      ) {
+        const imagemURL = await uploadImagemComida(req.file);
+        req.body.imagem = imagemURL;
+        const { error, value } = validacaoComida.validateAsync(req.body, {
+          abortEarly: false,
+        });
+        if (error) {
+          return res
+            .status(400)
+            .json({ msg: " Erro na validação do Joi" }, { err: error.message });
+        } else {
+        }
+        const novaComida = await Comida.create({
+          codigo,
+          nome,
+          descricao,
+          categoria,
+          preco,
+          peso,
+          imagem: imagemURL,
+          restauranteId,
+        });
+        res.status(201).json(novaComida);
+      } else if (!restauranteId) {
+        res.status(404).json({ message: "Restaurante não encontrado." });
+      } else {
+        res.status(400).json({ message: "Requisição inválida." });
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ message: err.message });
     }
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: err.message });
   }
-});
+);
 
 // ROTA PARA LISTAR TODAS AS COMIDAS
 // router.get("/comidas", async (req, res) => {
@@ -121,46 +129,65 @@ router.get("/comidas/restaurante/:id", checkTokenValido, async (req, res) => {
 });
 
 // ROTA PARA EDITAR COMIDA
-router.put("/comidas/:id", checkTokenRestaurante, upload.single("imagem"), async (req, res) => {
-  const { codigo, nome, descricao, categoria, preco, peso } = req.body;
-  try {
-    const comida = await Comida.findByPk(req.params.id);
-    const { error, value } = validacaoComidaAtt.validate(req.body, {
-      abortEarly: false,
-    });
-    if (error) {
-      return res
-        .status(400)
-        .json({ msg: " Erro na validação do Joi" }, { err: error.message });
-    } else if (!comida) {
-      res.status(404).json({ message: "Comida não encontrada." });
-      return;
-    }
-
-    if (codigo && nome && descricao && categoria && preco && peso) {
-      let imagemURL = comida.imagem;
-      if (req.file) {
-        imagemURL = await uploadImagemComida(req.file);
+router.put(
+  "/comidas/:id",
+  checkTokenRestaurante,
+  upload.single("imagem"),
+  async (req, res) => {
+    const { codigo, nome, descricao, categoria, preco, peso } = req.body;
+    try {
+      const comida = await Comida.findByPk(req.params.id);
+      if (!comida) {
+        return res.status(404).json({ message: "Comida não encontrada." });
       }
 
-      const updatedComida = await comida.update({
-        codigo,
-        nome,
-        descricao,
-        categoria,
-        preco,
-        peso,
-        imagem: imagemURL,
-      });
-      res.status(200).json(updatedComida);
-    } else {
-      res.status(400).json({ message: "Requisição inválida." });
+      if (codigo && nome && descricao && categoria && preco && peso) {
+        if (req.file) {
+          const imagemURL = await uploadImagemComida(req.file);
+          req.body.imagem = imagemURL;
+          const { error, value } = validacaoComidaAtt.validateAsync(req.body, {
+            abortEarly: false,
+          });
+          if (error) {
+            return res.status(405).json({ msg: " Erro na validação do Joi" });
+          }
+          const updatedComida = await comida.update({
+            codigo,
+            nome,
+            descricao,
+            categoria,
+            preco,
+            peso,
+            imagem: imagemURL,
+          });
+          res.status(200).json(updatedComida);
+        } else if (comida.imagem && !req.file) {
+          req.body.imagem = comida.imagem;
+          const { error, value } = validacaoComidaAtt.validateAsync(req.body, {
+            abortEarly: false,
+          });
+          if (error) {
+            return res.status(405).json({ msg: " Erro na validação do Joi" });
+          }
+          const updatedComida = await comida.update({
+            codigo,
+            nome,
+            descricao,
+            categoria,
+            preco,
+            peso,
+          });
+          res.status(200).json(updatedComida);
+        }
+      } else {
+        res.status(400).json({ message: "Requisição inválida." });
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ message: err.messages });
     }
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: err.messages });
   }
-});
+);
 
 // ROTA DELETE PARA COMIDA
 router.delete("/comidas/:id", checkTokenRestaurante, async (req, res) => {

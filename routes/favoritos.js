@@ -16,7 +16,7 @@ router.post("/restaurantes/favoritos", checkTokenCliente, async (req, res) => {
     const cliente = await Cliente.findByPk(clienteId);
     const restaurante = await Restaurante.findByPk(restauranteId);
 
-    const { error, value } = validacaoRestauranteFavorito.validate(req.body, {
+    const { error, value } = validacaoRestauranteFavorito.validateAsync(req.body, {
       abortEarly: false,
     });
     if (error) {
@@ -46,7 +46,7 @@ router.post("/comidas/favoritos", checkTokenCliente, async (req, res) => {
     const cliente = await Cliente.findByPk(clienteId);
     const comida = await Comida.findByPk(comidaId);
 
-    const { error, value } = validacaoComidaFavorito.validate(req.body, {
+    const { error, value } = validacaoComidaFavorito.validateAsync(req.body, {
       abortEarly: false,
     });
     if (error) {
