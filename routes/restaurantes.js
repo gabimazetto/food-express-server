@@ -12,7 +12,7 @@ const checkTokenCliente = require("../validation/tokenCliente");
 
 const router = Router();
 
-//INCIO JWT
+// INCIO JWT
 // POST - ROTA PARA ADICIONAR UM RESTAURANTE COM SENHA CRIPTOGRAFADA (brcypt);
 router.post("/restaurantes", async (req, res) => {
   const {
@@ -101,14 +101,14 @@ router.post("/restaurantes/login", async (req, res) => {
 
 //ACESSO A ROTA PRIVADA COM UTILIZAÇÃO DO TOKEN
 router.get("/restaurantes/home/:id", checkTokenRestaurante, async (req, res) => {
-    const { id } = req.params;
-    // checar se o restaurante existe
-    const restaurante = await Restaurante.findByPk(id);
-    if (!restaurante) {
-      return res.status(404).json({ msg: "Restaurante não encontrado!" });
-    }
-    res.status(200).json({ msg: "Bem vindo a esta rota privada" });
+  const { id } = req.params;
+  // checar se o restaurante existe
+  const restaurante = await Restaurante.findByPk(id);
+  if (!restaurante) {
+    return res.status(404).json({ msg: "Restaurante não encontrado!" });
   }
+  res.status(200).json({ msg: "Bem vindo a esta rota privada" });
+}
 );
 
 //ROTA PUBLICA SEM NECESSIDADE DO TOKEN
@@ -193,28 +193,37 @@ router.get("/restaurante/:nome", checkTokenCliente, async (req, res) => {
 
 //ROTA PARA LISTAR TODAS COMIDAS DO RESTAURANTE
 router.get("/restaurantes/:id/cardapio/", checkTokenRestaurante, async (req, res) => {
-    try {
-      const restaurante = await Comida.findAll({
-        where: { restauranteId: req.params.id },
-      });
-      if (restaurante) {
-        res.status(201).json(restaurante);
-      } else {
-        res.status(404).json({ message: "Restaurante não encontrado." });
-      }
-    } catch (err) {
-      console.log(err);
-      res.status(500).json({ message: "Um erro aconteceu." });
+  try {
+    const restaurante = await Comida.findAll({
+      where: { restauranteId: req.params.id },
+    });
+    if (restaurante) {
+      res.status(201).json(restaurante);
+    } else {
+      res.status(404).json({ message: "Restaurante não encontrado." });
     }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Um erro aconteceu." });
   }
+}
 );
 
 //ROTA PARA ATUALIZAR UM RESTAURANTE - PUT
 router.put("/restaurantes/:id", checkTokenRestaurante, async (req, res) => {
-  const { nomeFantasia, razaoSocial, telefone, cnpj, email, senha, endereco } =
-    req.body;
+  const {
+    nomeFantasia,
+    razaoSocial,
+    telefone,
+    cnpj,
+    email,
+    senha,
+    endereco,
+  } = req.body;
   const { id } = req.params;
   try {
+    const salt = await bcrypt.genSalt(12);
+    const senhaHash = await bcrypt.hash(senha, salt);
     const restauranteAtt = await Restaurante.findByPk(id);
     const { error, value } = validacaoRestaurante.validate(req.body, {
       abortEarly: false,
@@ -233,7 +242,7 @@ router.put("/restaurantes/:id", checkTokenRestaurante, async (req, res) => {
         telefone,
         cnpj,
         email,
-        senha,
+        senha: senhaHash,
       });
       res.status(200).json({ message: "Restaurante editado." });
     } else {
