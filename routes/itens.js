@@ -74,6 +74,24 @@ router.get("/itens/:restauranteId/:clienteId", checkTokenValido, async (req, res
 });
 
 
+router.get("/itens/:pedidoId", async (req, res) => {
+  const { pedidoId } = req.params;
+
+  try {
+    const itens = await Item.findAll({
+      where: {
+        pedidoId: pedidoId
+      }
+    });
+
+    res.status(200).json(itens);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Um erro aconteceu." });
+  }
+});
+
+
 // ROTA PARA ATUALIZAR UM ITEM - PUT
 router.put("/itens/:id", checkTokenCliente, async (req, res) => {
   const { quantidade, comidaId, pedidoId } = req.body;
@@ -109,6 +127,29 @@ router.delete("/itens/:id", checkTokenCliente, async (req, res) => {
     } else {
       res.status(404).json({ message: "Item não encontrado." });
     }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Um erro aconteceu." });
+  }
+});
+
+//ROTA PARA DELETAR TODOS ITENS DE UM PEDIDO
+router.delete("/itens/pedido/:pedidoId", async (req, res) => {
+  const { pedidoId } = req.params;
+
+  try {
+    const pedido = await Pedido.findByPk(pedidoId);
+    if (!pedido) {
+      return res.status(404).json({ message: "Pedido não encontrado." });
+    }
+
+    await Item.destroy({
+      where: {
+        pedidoId: pedidoId
+      }
+    });
+
+    res.status(200).json({ message: "Itens excluídos com sucesso." });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Um erro aconteceu." });

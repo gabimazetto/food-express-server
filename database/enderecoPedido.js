@@ -7,10 +7,6 @@ const EnderecoPedido = connection.define("enderecoPedido", {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    bairro: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
     numero: {
         type: DataTypes.STRING,
         allowNull: false,
