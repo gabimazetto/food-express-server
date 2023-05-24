@@ -26,7 +26,6 @@ const validacaoPedido = Joi.object({
     ),
   enderecoPedido: {
     rua: Joi.string().required(),
-    bairro: Joi.string().required(),
     numero: Joi.string().required(),
     cep: Joi.string().max(9).required(),
     complemento: Joi.string().allow(""),
@@ -34,6 +33,7 @@ const validacaoPedido = Joi.object({
 });
 
 const validacaoPedidoAtt = Joi.object({
+  
   status: Joi.string()
     .default("Pendente")
     .valid(
@@ -44,6 +44,22 @@ const validacaoPedidoAtt = Joi.object({
       "Entregue",
       "Cancelado"
     ),
+  metodoPagamento: Joi.string()
+    .valid(
+      "Cartão de crédito",
+      "Cartão de débito",
+      "Dinheiro",
+      "PIX",
+      "VR",
+      "VA",
+      "Carteira Digital"
+    ),
+  enderecoPedido: {
+    rua: Joi.string().required(),
+    numero: Joi.string().required(),
+    cep: Joi.string().max(9).required(),
+    complemento: Joi.string().allow(""),
+  },
 });
 
 module.exports = { validacaoPedido, validacaoPedidoAtt };
