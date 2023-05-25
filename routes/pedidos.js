@@ -349,7 +349,10 @@ router.put("/pedidos/:id", checkTokenValido, async (req, res) => {
         .status(400)
         .json({ msg: " Erro na validação do Joi" }, { err: error.message });
     } else if (pedido) {
-      await pedido.update({ status, metodoPagamento, enderecoPedido });
+      await pedido.update({ status, metodoPagamento });
+      if (enderecoPedido) {
+        await EnderecoPedido.update(enderecoPedido, { where: { pedidoId: id } });
+      }
       res.status(200).json({ message: "Pedido atualizado." });
     } else {
       res.status(404).json({ message: "Pedido não encontrado." });
