@@ -5,7 +5,7 @@ const { Op } = require("sequelize");
 const { Comida } = require("../database/comida");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const validacaoRestaurante = require("../validation/restaurante");
+const { validacaoRestaurante, validacaoRestauranteAtt } = require("../validation/restaurante");
 const checkTokenRestaurante = require("../validation/tokenRestaurante");
 const checkTokenValido = require("../validation/tokenValido");
 const checkTokenCliente = require("../validation/tokenCliente");
@@ -213,19 +213,13 @@ router.get("/restaurantes/:id/cardapio/", checkTokenRestaurante, async (req, res
 router.put("/restaurantes/:id", checkTokenRestaurante, async (req, res) => {
   const {
     nomeFantasia,
-    razaoSocial,
     telefone,
-    cnpj,
-    email,
-    senha,
     endereco,
   } = req.body;
   const { id } = req.params;
   try {
-    const salt = await bcrypt.genSalt(12);
-    const senhaHash = await bcrypt.hash(senha, salt);
     const restauranteAtt = await Restaurante.findByPk(id);
-    const { error, value } = validacaoRestaurante.validate(req.body, {
+    const { error, value } = validacaoRestauranteAtt.validate(req.body, {
       abortEarly: false,
     });
     if (error) {
@@ -238,11 +232,7 @@ router.put("/restaurantes/:id", checkTokenRestaurante, async (req, res) => {
       }
       await restauranteAtt.update({
         nomeFantasia,
-        razaoSocial,
-        telefone,
-        cnpj,
-        email,
-        senha: senhaHash,
+        telefone
       });
       res.status(200).json({ message: "Restaurante editado." });
     } else {
