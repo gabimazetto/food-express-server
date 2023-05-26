@@ -18,4 +18,17 @@ const validacaoRestaurante = Joi.object({
   },
 });
 
-module.exports = validacaoRestaurante;
+const validacaoRestauranteAtt = Joi.object({
+  nomeFantasia: Joi.string().max(130).required(),
+  telefone: Joi.string().max(14).required(),
+  endereco: {
+    uf: Joi.string().max(2).required(),
+    cidade: Joi.string().required(),
+    cep: Joi.string().max(9).required(),
+    rua: Joi.string().required(),
+    numero: Joi.string().required(),
+    complemento: Joi.string().allow(""),
+  },
+});
+
+module.exports = { validacaoRestaurante, validacaoRestauranteAtt };

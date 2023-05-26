@@ -6,7 +6,7 @@ const Pedido = require("../database/pedido");
 const { Router } = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const validacaoCliente = require("../validation/cliente");
+const { validacaoCliente, validacaoClienteAtt } = require("../validation/cliente");
 const checkTokenCliente = require("../validation/tokenCliente");
 
 // Criar o grupo de rotas (/clientes);
@@ -167,8 +167,6 @@ router.get("/clientes/:id/avaliacaos", checkTokenCliente, async (req, res) => {
 router.put("/clientes/:id", checkTokenCliente, async (req, res) => {
   const {
     nome,
-    email,
-    senha,
     telefone,
     cpf,
     dataNascimento,
@@ -176,10 +174,8 @@ router.put("/clientes/:id", checkTokenCliente, async (req, res) => {
   } = req.body;
   const { id } = req.params;
   try {
-    const salt = await bcrypt.genSalt(12);
-    const senhaHash = await bcrypt.hash(senha, salt);
     const atualizarCliente = await Cliente.findByPk(id);
-    const { error, value } = validacaoCliente.validateAsync(req.body, {
+    const { error, value } = validacaoClienteAtt.validateAsync(req.body, {
       abortEarly: false,
     });
     if (error) {
@@ -192,8 +188,6 @@ router.put("/clientes/:id", checkTokenCliente, async (req, res) => {
       }
       await atualizarCliente.update({
         nome,
-        email,
-        senha: senhaHash,
         telefone,
         cpf,
         dataNascimento,
