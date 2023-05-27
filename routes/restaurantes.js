@@ -9,6 +9,8 @@ const { validacaoRestaurante, validacaoRestauranteAtt } = require("../validation
 const checkTokenRestaurante = require("../validation/tokenRestaurante");
 const checkTokenValido = require("../validation/tokenValido");
 const checkTokenCliente = require("../validation/tokenCliente");
+const Favorito = require("../database/favorito");
+const Cliente = require("../database/cliente");
 
 const router = Router();
 
@@ -28,7 +30,7 @@ router.post("/restaurantes", async (req, res) => {
   try {
     const salt = await bcrypt.genSalt(12);
     const senhaHash = await bcrypt.hash(senha, salt);
-    const { error, value } = validacaoRestaurante.validate(req.body, {
+    const { error, value } = validacaoRestaurante.validateAsync(req.body, {
       abortEarly: false,
     });
     if (error) {
@@ -120,7 +122,29 @@ router.get("/", (req, res) => {
 
 router.get("/restaurantes", checkTokenValido, async (req, res) => {
   const listaRestaurantes = await Restaurante.findAll({
-    include: [Endereco],
+    include: [
+      {
+        model: Endereco
+      },
+      {
+        model: Favorito,
+      attributes: ["favoritar"],
+      include: [
+        {
+          model: Restaurante,
+          attributes: ["id"],
+        },
+        {
+          model: Cliente,
+          attributes: ["id"]
+        },
+        {
+          model:Comida,
+          attributes: ["id"],
+        }
+      ],
+      }
+    ],
   });
   res.json(listaRestaurantes);
 });
