@@ -1,12 +1,15 @@
 const { Op } = require("sequelize");
 const { Router } = require("express");
 const { Comida, uploadImagemComida } = require("../database/comida");
+const Favorito = require("../database/favorito");
 // Importar o Multer para gerenciar o upload dos arquivos do form.
 const multer = require("multer");
 const { validacaoComida, validacaoComidaAtt } = require("../validation/comida");
 const upload = multer();
 const checkTokenRestaurante = require("../validation/tokenRestaurante");
 const checkTokenValido = require("../validation/tokenValido");
+const Restaurante = require("../database/restaurante");
+const Cliente = require("../database/cliente");
 
 const router = Router();
 
@@ -90,7 +93,29 @@ router.get("/comidas", checkTokenValido, async (req, res) => {
   if (categoria) {
     whereClause.categoria = { [Op.eq]: categoria };
   }
-  const listaComidas = await Comida.findAll({ where: whereClause });
+  const listaComidas = await Comida.findAll({
+    where: whereClause, 
+    include: [
+      {
+        model: Favorito,
+        attributes: ["favoritar"],
+        include: [
+          {
+            model: Restaurante,
+            attributes: ["id"],
+          },
+          {
+            model: Cliente,
+            attributes: ["id"]
+          },
+          {
+            model:Comida,
+            attributes: ["id"],
+          }
+        ],
+      }
+    ]
+  })
   res.json(listaComidas);
 });
 
@@ -98,7 +123,27 @@ router.get("/comidas", checkTokenValido, async (req, res) => {
 router.get("/comidas/:id", checkTokenValido, async (req, res) => {
   try {
     const comida = await Comida.findOne({
-      where: { id: req.params.id },
+      where: { id: req.params.id }, 
+      include: [
+        {
+          model: Favorito,
+          attributes: ["favoritar"],
+          include: [
+            {
+              model: Restaurante,
+              attributes: ["id"],
+            },
+            {
+              model: Cliente,
+              attributes: ["id"]
+            },
+            {
+              model:Comida,
+              attributes: ["id"],
+            }
+          ],
+        }
+      ]
     });
     if (comida) {
       res.status(201).json(comida);
@@ -115,7 +160,27 @@ router.get("/comidas/:id", checkTokenValido, async (req, res) => {
 router.get("/comidas/restaurante/:id", checkTokenValido, async (req, res) => {
   try {
     const comida = await Comida.findAll({
-      where: { restauranteId: req.params.id },
+      where: { restauranteId: req.params.id }, 
+      include: [
+        {
+          model: Favorito,
+          attributes: ["favoritar"],
+          include: [
+            {
+              model: Restaurante,
+              attributes: ["id"],
+            },
+            {
+              model: Cliente,
+              attributes: ["id"]
+            },
+            {
+              model:Comida,
+              attributes: ["id"],
+            }
+          ],
+        }
+      ]
     });
     if (comida) {
       res.status(201).json(comida);

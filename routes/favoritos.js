@@ -3,7 +3,7 @@ const Cliente = require("../database/cliente");
 const { Comida } = require("../database/comida");
 const Restaurante = require("../database/restaurante");
 const Favorito = require("../database/favorito");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const { validacaoComidaFavorito, validacaoRestauranteFavorito } = require("../validation/favorito");
 const checkTokenCliente = require("../validation/tokenCliente");
 
@@ -122,6 +122,41 @@ router.get("/favoritos/comidas", checkTokenCliente, async (req, res) => {
 });
 
 //Rota GET para listar todas as comidas favoritas de um cliente especifico
+router.get("/favoritos/restaurantes/:clienteId", checkTokenCliente, async (req, res) => {
+  const { clienteId } = req.params;
+
+  try {
+    const favoritos = await Favorito.findAll({
+      where: {
+        restauranteId: {
+          [Op.ne]: null,
+        },
+        clienteId: clienteId,
+        favoritar: {
+          [Op.ne]: false,
+        }
+      },
+      include: [
+        {
+          model: Restaurante,
+          attributes: ["nomeFantasia", "razaoSocial", "telefone", "cnpj"],
+        },
+      ],
+    });
+    if(favoritos){
+      res.status(200).json(favoritos);
+    }else{
+        res.status(404).json({
+          message: "Nenhum restaurante favorita encontrada para este cliente",
+        });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erro 500" });
+  }
+});
+
+//Rota GET para listar todas as comidas favoritas de um cliente especifico
 router.get("/favoritos/comidas/:clienteId", checkTokenCliente, async (req, res) => {
   const { clienteId } = req.params;
 
@@ -131,6 +166,56 @@ router.get("/favoritos/comidas/:clienteId", checkTokenCliente, async (req, res) 
         comidaId: {
           [Op.ne]: null,
         },
+        clienteId: clienteId,
+        favoritar: {
+          [Op.ne]: false,
+        }
+      },
+      include: [
+        {
+          model: Comida,
+          attributes: ["id", "nome", "descricao", "preco", "restauranteId"],
+          include: [
+            {
+              model: Restaurante,
+              attributes: ["nomeFantasia"],
+            },
+          ],
+        },
+        {
+          model: Cliente,
+          attributes: ["id"]
+        },
+      ],
+    });
+    if(favoritos){
+      res.status(200).json(favoritos);
+    }else{
+        res.status(404).json({
+          message: "Nenhuma comida favorita encontrada para este cliente",
+        });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erro 500" });
+  }
+});
+
+// Rota PATCH para criar um favorito caso não exista de um cliente especifico
+// e atualizar o estado de favorito dele para inverter caso já exista
+router.patch("/favoritos/comidas/", checkTokenCliente, async (req, res) => {
+  const { favoritar, comidaId, clienteId } = req.body;
+  try {
+    const cliente = await Cliente.findByPk(clienteId);
+    const comida = await Comida.findByPk(comidaId);
+
+    const { error, value } = validacaoComidaFavorito.validateAsync(req.body, {
+      abortEarly: false,
+    });
+
+    const favorito = await Favorito.findOne({
+      where: {
+        comidaId: comidaId,
         clienteId: clienteId,
       },
       include: [
@@ -144,33 +229,147 @@ router.get("/favoritos/comidas/:clienteId", checkTokenCliente, async (req, res) 
             },
           ],
         },
+        {
+          model: Cliente,
+          attributes: ["id"]
+        },
       ],
     });
-
-    const comidaIds = favoritos.map((favorito) => favorito.comidaId);
-    const comidasFavoritadasUnico = Array.from(new Set(comidaIds));
-
-    const comidasFavoritadas = await Comida.findAll({
-      where: {
-        id: {
-          [Op.in]: comidasFavoritadasUnico,
+    if(cliente && comida && !favorito){
+      const novoFavorito = await Favorito.create({
+        favoritar,
+        comidaId,
+        clienteId,
+      });
+      return res.status(201).json({ favorito: novoFavorito, message: "Refeição foi adicionado aos favoritos" });
+    } else if(favorito && comidaId){
+      await Favorito.update( 
+        {favoritar: !favorito.favoritar},
+        {where: { comidaId , clienteId }
+      })
+      const alteradoFavorito = await Favorito.findOne({
+        where: {
+          comidaId: comidaId,
+          clienteId: clienteId,
         },
+        include: [
+          {
+            model: Comida,
+            attributes: ["id", "nome", "descricao", "preco", "restauranteId"],
+            include: [
+              {
+                model: Restaurante,
+                attributes: ["nomeFantasia"],
+              },
+            ],
+          },
+          {
+            model: Cliente,
+            attributes: ["id"]
+          }
+        ],
+      });
+      if(alteradoFavorito.favoritar){
+        return res.status(200).json({
+          favorito: alteradoFavorito, 
+          message: "Refeição foi adicionado aos favoritos"
+        })
+      }else{
+        return res.status(200).json({
+          favorito: alteradoFavorito, 
+          message: "Refeição foi removido aos favoritos"
+        });
+      }
+    } else{
+        return res.status(404).json({
+          message: "Nenhuma comida favorita encontrada para este cliente",
+        });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erro 500" });
+  }
+});
+
+// Rota PATCH para criar um favorito caso não exista de um cliente especifico
+// e atualizar o estado de favorito dele para inverter caso já exista
+router.patch("/favoritos/restaurante/", checkTokenCliente, async (req, res) => {
+  const { favoritar, restauranteId, clienteId } = req.body;
+  try {
+    const cliente = await Cliente.findByPk(clienteId);
+    const restaurante = await Restaurante.findByPk(restauranteId);
+
+    const { error, value } = validacaoRestauranteFavorito.validateAsync(req.body, {
+      abortEarly: false,
+    });
+
+    const favorito = await Favorito.findOne({
+      where: {
+        restauranteId: restauranteId,
+        clienteId: clienteId,
       },
-      attributes: ["id", "nome", "descricao", "preco", "restauranteId"],
       include: [
         {
-          model: Restaurante,
-          attributes: ["nomeFantasia"],
+          model: Comida,
+          attributes: ["id", "nome", "descricao", "preco", "restauranteId"],
+          include: [
+            {
+              model: Restaurante,
+              attributes: ["nomeFantasia"],
+            },
+          ],
+        },
+        {
+          model: Cliente,
+          attributes: ["id"]
         },
       ],
     });
-
-    if (comidasFavoritadas.length > 0) {
-      res.status(200).json(comidasFavoritadas);
-    } else {
-      res.status(404).json({
-        message: "Nenhuma comida favorita encontrada para este cliente",
+    if(cliente && restaurante && !favorito){
+      const novoFavorito = await Favorito.create({
+        favoritar,
+        restauranteId,
+        clienteId,
       });
+      return res.status(201).json({ favorito: novoFavorito, message: "Restaurante foi adicionado aos favoritos" });
+    } else if(favorito && restauranteId){
+      await Favorito.update( 
+        {favoritar: !favorito.favoritar},
+        {where: { restauranteId , clienteId }
+      })
+      const alteradoFavorito = await Favorito.findOne({
+        where: {
+          restauranteId: restauranteId,
+          clienteId: clienteId,
+        },
+        include: [
+          {
+            model: Comida,
+            attributes: ["id", "nome", "descricao", "preco", "restauranteId"],
+            include: [
+              {
+                model: Restaurante,
+                attributes: ["nomeFantasia"],
+              },
+            ],
+          },
+        ],
+      });
+      if(alteradoFavorito.favoritar){
+        return res.status(200).json({
+          favorito: alteradoFavorito, 
+          message: "Restaurante foi adicionado aos favoritos"
+        })
+      }else{
+        return res.status(200).json({
+          favorito: alteradoFavorito, 
+          message: "Restaurante foi removido aos favoritos"
+        });
+      }
+    } else{
+        return res.status(404).json({
+          message: "Nenhum Restaurante favorito encontrada para este cliente",
+        });
     }
   } catch (err) {
     console.error(err);
@@ -263,7 +462,7 @@ router.delete("/favoritos/comidas/:id", checkTokenCliente, async (req, res) => {
 
 router.delete("/favoritos/restaurantes/:id", checkTokenCliente, async (req, res) => {
   const { id } = req.params;
-  const favorito = await Favorito.findOne({ where: { id } });
+  const favorito = await Favorito.findOne({ where: { restauranteId: id } });
   try {
     if (favorito) {
       await favorito.destroy();
