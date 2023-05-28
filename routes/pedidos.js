@@ -81,7 +81,7 @@ router.get("/pedidos", checkTokenValido, async (req, res) => {
           attributes: ["nomeFantasia", "cnpj", "telefone"],
         },
       ],
-      order: [["dataRegistro", "ASC"]],
+      order: [["dataRegistro", "DESC"]],
     });
     res.status(200).json(pedidos);
   } catch (err) {
@@ -157,7 +157,7 @@ router.get("/pedidos/restaurante/:restauranteId", checkTokenRestaurante, async (
             attributes: ["nomeFantasia"],
           },
         ],
-        order: [["dataRegistro", "ASC"]],
+        order: [["dataRegistro", "DESC"]],
       });
       res.status(200).json(pedidos);
     } else {
@@ -185,7 +185,7 @@ router.get("/pedidos/restaurante/:restauranteId", checkTokenRestaurante, async (
             attributes: ["nomeFantasia"],
           },
         ],
-        order: [["dataRegistro", "ASC"]],
+        order: [["dataRegistro", "DESC"]],
       });
       res.status(200).json(pedidos);
     }
